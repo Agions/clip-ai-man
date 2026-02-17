@@ -34,14 +34,20 @@ export interface UseWorkflowReturn {
   videoAnalysis: WorkflowData['videoAnalysis'];
   selectedTemplate: WorkflowData['selectedTemplate'];
   generatedScript: WorkflowData['generatedScript'];
+  dedupedScript: WorkflowData['dedupedScript'];
+  uniqueScript: WorkflowData['uniqueScript'];
   editedScript: WorkflowData['editedScript'];
   timeline: WorkflowData['timeline'];
+  originalityReport: WorkflowData['originalityReport'];
+  uniquenessReport: WorkflowData['uniquenessReport'];
 
   // 操作
   start: (projectId: string, videoFile: File, config: WorkflowConfig) => Promise<void>;
   analyze: () => Promise<VideoAnalysis>;
   selectTemplate: (templateId?: string) => Promise<ScriptTemplate>;
   generateScript: (model: any, params: any) => Promise<ScriptData>;
+  dedupScript: (config?: any) => Promise<{ script: ScriptData; report: any }>;
+  ensureUniqueness: (config?: any) => Promise<{ script: ScriptData; isUnique: boolean; attempts: number }>;
   editScript: (script: ScriptData) => Promise<ScriptData>;
   editTimeline: (autoMatch?: boolean) => Promise<any>;
   preview: () => Promise<string>;
@@ -126,6 +132,18 @@ export function useWorkflow(callbacks?: WorkflowCallbacks): UseWorkflowReturn {
     return result;
   }, []);
 
+  const dedupScript = useCallback(async (config?: any) => {
+    const result = await workflowService.stepDedupScript(config);
+    setState(workflowService.getState());
+    return result;
+  }, []);
+
+  const ensureUniqueness = useCallback(async (config?: any) => {
+    const result = await workflowService.stepEnsureUniqueness(config);
+    setState(workflowService.getState());
+    return result;
+  }, []);
+
   const editScript = useCallback(async (script: ScriptData) => {
     const result = await workflowService.stepEditScript(script);
     setState(workflowService.getState());
@@ -192,14 +210,20 @@ export function useWorkflow(callbacks?: WorkflowCallbacks): UseWorkflowReturn {
     videoAnalysis: state.data.videoAnalysis,
     selectedTemplate: state.data.selectedTemplate,
     generatedScript: state.data.generatedScript,
+    dedupedScript: state.data.dedupedScript,
+    uniqueScript: state.data.uniqueScript,
     editedScript: state.data.editedScript,
     timeline: state.data.timeline,
+    originalityReport: state.data.originalityReport,
+    uniquenessReport: state.data.uniquenessReport,
 
     // 操作
     start,
     analyze,
     selectTemplate,
     generateScript,
+    dedupScript,
+    ensureUniqueness,
     editScript,
     editTimeline,
     preview,

@@ -124,6 +124,8 @@ export const WorkflowPage: React.FC = () => {
     analyze,
     selectTemplate,
     generateScript,
+    dedupScript,
+    ensureUniqueness,
     editScript,
     editTimeline,
     preview,
@@ -427,6 +429,59 @@ export const WorkflowPage: React.FC = () => {
                     </ul>
                   </div>
                 )}
+
+                {/* 唯一性报告 */}
+                {data.uniquenessReport && (
+                  <div className={styles.uniquenessReport}>
+                    <Title level={5}>唯一性检测</Title>
+                    <Row gutter={[16, 16]}>
+                      <Col span={12}>
+                        <Card size="small">
+                          <div className={styles.uniquenessStatus}>
+                            <Text>唯一性状态：</Text>
+                            <Text strong className={
+                              data.uniquenessReport.check.isUnique ? styles.unique : styles.notUnique
+                            }>
+                              {data.uniquenessReport.check.isUnique ? '✅ 唯一' : '⚠️ 需优化'}
+                            </Text>
+                          </div>
+                          <div className={styles.similarityScore}>
+                            <Text>历史相似度：</Text>
+                            <Text strong>{(data.uniquenessReport.check.similarity * 100).toFixed(1)}%</Text>
+                          </div>
+                        </Card>
+                      </Col>
+                      <Col span={12}>
+                        <Card size="small" title="历史记录">
+                          <div>
+                            <Text>总脚本数：</Text>
+                            <Text strong>{data.uniquenessReport.history.totalScripts}</Text>
+                          </div>
+                          <div>
+                            <Text>近7天：</Text>
+                            <Text strong>{data.uniquenessReport.history.recentScripts}</Text>
+                          </div>
+                        </Card>
+                      </Col>
+                    </Row>
+
+                    {data.uniquenessReport.check.suggestions.length > 0 && (
+                      <Alert
+                        message="唯一性建议"
+                        description={
+                          <ul>
+                            {data.uniquenessReport.check.suggestions.map((s: string, i: number) => (
+                              <li key={i}>{s}</li>
+                            ))}
+                          </ul>
+                        }
+                        type={data.uniquenessReport.check.isUnique ? 'success' : 'warning'}
+                        showIcon
+                        className={styles.uniquenessAlert}
+                      />
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <div className={styles.loadingArea}>
@@ -440,9 +495,9 @@ export const WorkflowPage: React.FC = () => {
       case 'script-edit':
         return (
           <Card title="编辑脚本" className={styles.stepCard}>
-            {data.dedupedScript && (
+            {data.uniqueScript && (
               <ScriptEditor
-                script={data.dedupedScript}
+                script={data.uniqueScript}
                 onSave={editScript}
                 scenes={data.videoAnalysis?.scenes}
               />

@@ -124,6 +124,82 @@
       border-radius: 8px;
     }
   }
+
+  // 去重结果样式
+  .dedupResult {
+    .scoreDisplay {
+      text-align: center;
+      font-size: 32px;
+      font-weight: bold;
+
+      .scoreHigh {
+        color: #52c41a;
+      }
+
+      .scoreMedium {
+        color: #faad14;
+      }
+
+      .scoreLow {
+        color: #f5222d;
+      }
+    }
+
+    .duplicateList {
+      margin-top: 24px;
+
+      .duplicateAlert {
+        margin-bottom: 12px;
+      }
+    }
+
+    .suggestionList {
+      margin-top: 24px;
+      padding: 16px;
+      background: #fff7e6;
+      border: 1px solid #ffd591;
+      border-radius: 8px;
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+
+        li {
+          margin-bottom: 8px;
+          color: #666;
+        }
+      }
+    }
+  }
+
+  // 唯一性报告样式
+  .uniquenessReport {
+    margin-top: 24px;
+    padding: 16px;
+    background: #f0f5ff;
+    border: 1px solid #adc6ff;
+    border-radius: 8px;
+
+    .uniquenessStatus {
+      margin-bottom: 8px;
+
+      .unique {
+        color: #52c41a;
+      }
+
+      .notUnique {
+        color: #f5222d;
+      }
+    }
+
+    .similarityScore {
+      color: #666;
+    }
+
+    .uniquenessAlert {
+      margin-top: 16px;
+    }
+  }
 }
 
 // 响应式
