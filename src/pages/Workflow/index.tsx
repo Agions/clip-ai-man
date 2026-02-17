@@ -77,6 +77,12 @@ const WORKFLOW_STEPS: Array<{
     icon: <FileTextOutlined />
   },
   {
+    key: 'script-dedup',
+    title: '原创性检测',
+    description: '检测并优化重复内容',
+    icon: <FileTextOutlined />
+  },
+  {
     key: 'script-edit',
     title: '编辑脚本',
     description: '修改和完善解说词',
@@ -354,12 +360,89 @@ export const WorkflowPage: React.FC = () => {
           </Card>
         );
 
+      case 'script-dedup':
+        return (
+          <Card title="原创性检测" className={styles.stepCard}>
+            {data.originalityReport ? (
+              <div className={styles.dedupResult}>
+                <Row gutter={[16, 16]}>
+                  <Col span={8}>
+                    <Card size="small" title="原创性分数">
+                      <div className={styles.scoreDisplay}>
+                        <Text className={
+                          data.originalityReport.score >= 80 ? styles.scoreHigh :
+                          data.originalityReport.score >= 60 ? styles.scoreMedium :
+                          styles.scoreLow
+                        }>
+                          {data.originalityReport.score}分
+                        </Text>
+                      </div>
+                    </Card>
+                  </Col>
+                  <Col span={8}>
+                    <Card size="small" title="重复段落">
+                      <Text strong>{data.originalityReport.duplicates.length}</Text>
+                      <Text> 处</Text>
+                    </Card>
+                  </Col>
+                  <Col span={8}>
+                    <Card size="small" title="建议">
+                      <Text strong>{data.originalityReport.suggestions.length}</Text>
+                      <Text> 条</Text>
+                    </Card>
+                  </Col>
+                </Row>
+
+                {data.originalityReport.duplicates.length > 0 && (
+                  <div className={styles.duplicateList}>
+                    <Title level={5}>重复内容</Title>
+                    {data.originalityReport.duplicates.map((dup, index) => (
+                      <Alert
+                        key={dup.id}
+                        message={`重复 #${index + 1} - ${dup.type === 'exact' ? '完全重复' : dup.type === 'similar' ? '相似内容' : '模板套话'}`}
+                        description={
+                          <div>
+                            <Paragraph ellipsis={{ rows: 2 }}>
+                              <Text type="secondary">原文：</Text>
+                              {dup.target.content}
+                            </Paragraph>
+                            <Text type="warning">{dup.suggestion}</Text>
+                          </div>
+                        }
+                        type={dup.type === 'exact' ? 'error' : dup.type === 'similar' ? 'warning' : 'info'}
+                        showIcon
+                        className={styles.duplicateAlert}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {data.originalityReport.suggestions.length > 0 && (
+                  <div className={styles.suggestionList}>
+                    <Title level={5}>优化建议</Title>
+                    <ul>
+                      {data.originalityReport.suggestions.map((suggestion, index) => (
+                        <li key={index}>{suggestion}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className={styles.loadingArea}>
+                <Progress percent={progress} status="active" />
+                <Text>正在检测原创性...</Text>
+              </div>
+            )}
+          </Card>
+        );
+
       case 'script-edit':
         return (
           <Card title="编辑脚本" className={styles.stepCard}>
-            {data.generatedScript && (
+            {data.dedupedScript && (
               <ScriptEditor
-                script={data.generatedScript}
+                script={data.dedupedScript}
                 onSave={editScript}
                 scenes={data.videoAnalysis?.scenes}
               />

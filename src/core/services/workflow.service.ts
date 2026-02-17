@@ -5,6 +5,7 @@
 
 import { visionService } from './vision.service';
 import { scriptTemplateService } from '../templates/script.templates';
+import { dedupService } from '../templates/dedup.templates';
 import { aiService } from './ai.service';
 import { videoService } from './video.service';
 import { storageService } from './storage.service';
@@ -25,6 +26,7 @@ export type WorkflowStep =
   | 'analyze'
   | 'template-select'
   | 'script-generate'
+  | 'script-dedup'
   | 'script-edit'
   | 'timeline-edit'
   | 'preview'
@@ -46,9 +48,15 @@ export interface WorkflowData {
   videoAnalysis?: VideoAnalysis;
   selectedTemplate?: ScriptTemplate;
   generatedScript?: ScriptData;
+  dedupedScript?: ScriptData;
   editedScript?: ScriptData;
   timeline?: TimelineData;
   exportSettings?: ExportSettings;
+  originalityReport?: {
+    score: number;
+    duplicates: any[];
+    suggestions: string[];
+  };
 }
 
 // 时间轴数据
@@ -74,6 +82,7 @@ export interface TimelineData {
 export interface WorkflowConfig {
   autoAnalyze: boolean;
   autoGenerateScript: boolean;
+  autoDedup: boolean;
   preferredTemplate?: string;
   model: AIModel;
   scriptParams: {
@@ -82,6 +91,11 @@ export interface WorkflowConfig {
     length: 'short' | 'medium' | 'long';
     targetAudience: string;
     language: string;
+  };
+  dedupConfig?: {
+    enabled: boolean;
+    autoFix: boolean;
+    threshold: number;
   };
 }
 
@@ -193,11 +207,18 @@ class WorkflowService {
       if (config.autoGenerateScript) {
         await this.stepGenerateScript(config.model, config.scriptParams);
       } else {
-        this.updateState({ step: 'script-generate', progress: 50 });
+        this.updateState({ step: 'script-generate', progress: 45 });
         return;
       }
 
-      // Step 5: 编辑脚本
+      // Step 5: 脚本去重
+      if (config.autoDedup !== false && config.dedupConfig?.enabled !== false) {
+        await this.stepDedupScript(config.dedupConfig);
+      } else {
+        this.updateState({ step: 'script-dedup', progress: 55 });
+      }
+
+      // Step 6: 编辑脚本
       this.updateState({ step: 'script-edit', progress: 60 });
 
       // Step 6: 时间轴编辑
@@ -448,7 +469,58 @@ ${section.tips?.map((tip: string) => `- ${tip}`).join('\n')}
   }
 
   /**
-   * 步骤5: 编辑脚本
+   * 步骤5: 脚本去重
+   */
+  async stepDedupScript(
+    dedupConfig?: WorkflowConfig['dedupConfig']
+  ): Promise<{
+    script: ScriptData;
+    report: { score: number; duplicates: any[]; suggestions: string[] };
+  }> {
+    this.updateState({ step: 'script-dedup', progress: 50 });
+
+    const { generatedScript } = this.state.data;
+    if (!generatedScript) {
+      throw new Error('脚本尚未生成');
+    }
+
+    // 配置去重服务
+    const config = {
+      enabled: true,
+      strategies: ['exact', 'semantic', 'template'] as const,
+      threshold: 0.7,
+      autoFix: false,
+      preserveMeaning: true,
+      ...dedupConfig
+    };
+
+    dedupService.updateConfig(config);
+
+    // 生成原创性报告
+    const report = dedupService.generateOriginalityReport(generatedScript);
+    this.updateState({ progress: 52 });
+
+    let dedupedScript = generatedScript;
+
+    // 自动修复（如果启用）
+    if (config.autoFix && report.score < 80) {
+      dedupedScript = dedupService.autoFix(generatedScript);
+      this.updateState({ progress: 54 });
+    }
+
+    // 更新数据
+    this.updateData({
+      dedupedScript,
+      originalityReport: report
+    });
+
+    this.updateState({ progress: 55 });
+
+    return { script: dedupedScript, report };
+  }
+
+  /**
+   * 步骤6: 编辑脚本
    */
   async stepEditScript(editedScript: ScriptData): Promise<ScriptData> {
     this.updateState({ step: 'script-edit', progress: 60 });
@@ -699,6 +771,7 @@ ${section.tips?.map((tip: string) => `- ${tip}`).join('\n')}
       analyze: 20,
       'template-select': 35,
       'script-generate': 40,
+      'script-dedup': 50,
       'script-edit': 60,
       'timeline-edit': 70,
       preview: 90,
