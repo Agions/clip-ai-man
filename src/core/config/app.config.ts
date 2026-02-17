@@ -9,7 +9,7 @@ export const APP_CONFIG = {
   version: '1.0.0',
   description: 'AI驱动的专业视频内容创作平台',
   repository: 'https://github.com/Agions/reelforge',
-  license: 'CC-BY-NC-4.0'
+  license: 'ReelForge-1.0'
 } as const;
 
 // 存储配置

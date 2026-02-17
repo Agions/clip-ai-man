@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "AI-powered video content creation platform for filmmakers and content creators",
   "author": "Agions <agions@example.com>",
-  "license": "CC-BY-NC-4.0",
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "scripts": {
     "dev": "vite",
