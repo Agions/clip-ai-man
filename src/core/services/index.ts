@@ -11,6 +11,7 @@ export { scriptTemplateService } from '../templates/script.templates';
 export { editorService, EditorService } from './editor.service';
 export { costService, CostService } from './cost.service';
 export { consistencyService, ConsistencyService } from './consistency.service';
+export { novelService, NovelService } from './novel.service';
 
 // 重新导出类型
 export type { AIResponse, RequestConfig } from './ai.service';
@@ -40,3 +41,10 @@ export type {
   ConsistencyIssue,
   CharacterLibrary
 } from './consistency.service';
+export type {
+  NovelChapter,
+  ScriptScene,
+  Script,
+  NovelParseResult,
+  Storyboard
+} from './novel.service';
