@@ -7,7 +7,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "Nova",
+    "productName": "漫剧师",
     "version": "0.1.0"
   },
   "tauri": {
@@ -78,7 +78,7 @@
     },
     "windows": [
       {
-        "title": "Nova - 视频脚本编辑工具",
+        "title": "漫剧师 - AI漫剧创作平台",
         "width": 1200,
         "height": 800,
         "minWidth": 800,

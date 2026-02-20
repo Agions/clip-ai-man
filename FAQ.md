@@ -1,6 +1,6 @@
-# Nova 常见问题解答 (FAQ)
+# 漫剧师 常见问题解答 (FAQ)
 
-本文档整理了Nova开发和使用过程中的常见问题及其解决方案，帮助开发者和用户快速解决遇到的问题。
+本文档整理了漫剧师开发和使用过程中的常见问题及其解决方案，帮助开发者和用户快速解决遇到的问题。
 
 ## 目录
 
@@ -20,7 +20,7 @@
 
 1. 访问 https://rustup.rs/ 并按照指示安装Rustup
 2. 安装完成后，打开终端运行 `rustup default stable` 确保使用稳定版
-3. 重新运行Nova的安装命令
+3. 重新运行漫剧师的安装命令
 
 ### Q: 在Windows上安装时提示"找不到Visual Studio C++构建工具"怎么办？
 
@@ -29,7 +29,7 @@
 1. 下载并安装 [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
 2. 在安装过程中，确保选择了"C++构建工具"选项
 3. 安装完成后重启电脑
-4. 重新运行Nova的安装命令
+4. 重新运行漫剧师的安装命令
 
 ### Q: 在macOS上安装时提示"找不到Xcode命令行工具"怎么办？
 
@@ -38,7 +38,7 @@
 1. 打开终端
 2. 运行命令 `xcode-select --install`
 3. 按照弹出窗口的指示完成安装
-4. 重新运行Nova的安装命令
+4. 重新运行漫剧师的安装命令
 
 ### Q: 启动应用时出现"无法加载共享库"错误怎么办？
 
@@ -67,7 +67,7 @@ brew install gtk+3 webkit2gtk3 libappindicator-gtk3
 
 ### Q: 如何解决Node.js版本不兼容问题？
 
-**A:** Nova需要Node.js 16.0或更高版本。如果您使用的是较低版本，可以通过以下方式升级：
+**A:** 漫剧师需要Node.js 16.0或更高版本。如果您使用的是较低版本，可以通过以下方式升级：
 
 1. 使用nvm（推荐）：
    ```bash
@@ -84,19 +84,19 @@ brew install gtk+3 webkit2gtk3 libappindicator-gtk3
 
 ### Q: 项目文件保存在哪里？
 
-**A:** 默认情况下，Nova项目文件保存在以下位置：
+**A:** 默认情况下，漫剧师项目文件保存在以下位置：
 
-- **Windows:** `%USERPROFILE%\Documents\Nova\Projects\`
-- **macOS:** `~/Documents/Nova/Projects/`
-- **Linux:** `~/Documents/Nova/Projects/`
+- **Windows:** `%USERPROFILE%\Documents\漫剧师\Projects\`
+- **macOS:** `~/Documents/漫剧师/Projects/`
+- **Linux:** `~/Documents/漫剧师/Projects/`
 
 您可以在应用设置中更改默认保存位置。
 
 ### Q: 如何恢复未保存的项目？
 
-**A:** Nova会自动创建项目备份：
+**A:** 漫剧师会自动创建项目备份：
 
-1. 打开Nova
+1. 打开漫剧师
 2. 点击顶部菜单：文件 > 恢复项目
 3. 选择要恢复的自动保存项目
 
@@ -105,7 +105,7 @@ brew install gtk+3 webkit2gtk3 libappindicator-gtk3
 1. 导航到项目文件夹中的`backups`子文件夹
 2. 查找最新的备份文件（格式为`项目名称_年月日_时分秒.backup`）
 3. 将文件重命名为`.blazecut`扩展名
-4. 通过Nova打开该文件
+4. 通过漫剧师打开该文件
 
 ### Q: 项目文件损坏怎么办？
 
@@ -113,7 +113,7 @@ brew install gtk+3 webkit2gtk3 libappindicator-gtk3
 
 1. 使用备份文件恢复（见上一问题）
 2. 如果没有可用的备份，可以尝试修复工具：
-   - 打开Nova
+   - 打开漫剧师
    - 点击顶部菜单：文件 > 修复项目
    - 选择损坏的项目文件
 
@@ -131,7 +131,7 @@ brew install gtk+3 webkit2gtk3 libappindicator-gtk3
    ffmpeg -i 原始视频.格式 -c:v libx264 -c:a aac 转换后视频.mp4
    ```
 3. 检查视频文件是否完整，尝试在其他播放器中播放
-4. 更新Nova到最新版本，以获取最新的编解码器支持
+4. 更新漫剧师到最新版本，以获取最新的编解码器支持
 
 ### Q: 视频预览卡顿怎么办？
 
@@ -642,4 +642,4 @@ brew install gtk+3 webkit2gtk3 libappindicator-gtk3
    }
    ```
 
-这份FAQ文档整理了Nova开发和使用过程中的常见问题及其解决方案，帮助开发者和用户快速解决遇到的问题，提高开发和使用效率。
+这份FAQ文档整理了漫剧师开发和使用过程中的常见问题及其解决方案，帮助开发者和用户快速解决遇到的问题，提高开发和使用效率。

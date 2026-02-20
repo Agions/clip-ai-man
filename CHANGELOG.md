@@ -5,10 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [1.1.0] - 2026-02-17
 
 ### Renamed
-- **Project Name**: Nova → Nova (漫剧工坊)
+- **Project Name**: Nova → 漫剧师 (Manjushi)
   - New ASCII art logo
   - Updated all documentation references
-  - GitHub: https://github.com/Agions/Nova
+  - GitHub: https://github.com/Agions/Manjushi
 
 ### Added
 - **8-Step Drama Workflow**: Novel → Script → Storyboard → Character → Scene → Animation → Voiceover → Export
@@ -41,7 +41,7 @@ All notable changes to this project will be documented in this file.
 ## [1.0.0] - 2026-02-17
 
 ### Added
-- Initial release of Nova
+- Initial release of 漫剧师
 - AI-powered video content creation platform
 - Support for 8 major AI providers (OpenAI, Anthropic, Google, Baidu, Alibaba, Zhipu, iFlytek, Tencent)
 - Professional video upload and analysis

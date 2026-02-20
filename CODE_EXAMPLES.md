@@ -1,6 +1,6 @@
-# Nova 示例代码库
+# 漫剧师 示例代码库
 
-本文档提供了Nova项目中常见功能的示例代码，帮助开发者快速理解和实现各种功能。
+本文档提供了漫剧师项目中常见功能的示例代码，帮助开发者快速理解和实现各种功能。
 
 ## 目录
 
@@ -14,7 +14,7 @@
 
 ### 基本视频剪辑
 
-以下示例展示了如何使用Nova的API进行基本的视频剪辑操作：
+以下示例展示了如何使用漫剧师的API进行基本的视频剪辑操作：
 
 ```typescript
 import { editVideo, ScriptSegment, EditOptions } from '../services/videoService';
@@ -524,4 +524,4 @@ const ScriptEditorExample: React.FC = () => {
 export default ScriptEditorExample;
 ```
 
-这些示例代码提供了Nova项目中常见功能的实现方法，开发者可以参考这些示例快速上手项目开发。每个示例都包含了完整的代码和注释，方便理解和使用。
+这些示例代码提供了漫剧师项目中常见功能的实现方法，开发者可以参考这些示例快速上手项目开发。每个示例都包含了完整的代码和注释，方便理解和使用。

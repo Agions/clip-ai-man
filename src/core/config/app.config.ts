@@ -5,10 +5,10 @@
 
 // 应用信息
 export const APP_CONFIG = {
-  name: 'Nova',
+  name: '漫剧师',
   version: '1.0.0',
-  description: 'AI驱动的专业视频内容创作平台',
-  repository: 'https://github.com/Agions/reelforge',
+  description: 'AI驱动的专业漫剧视频创作平台',
+  repository: 'https://github.com/Agions/manjushi',
   license: 'MIT'
 } as const;
 

@@ -1,9 +1,9 @@
 {
-  "name": "nova",
+  "name": "manjushi",
   "private": true,
   "version": "1.1.0",
-  "description": "Nova (漫剧工坊) - AI-powered comic drama video generation platform",
-  "author": "Agions <agions@example.com>",
+  "description": "漫剧师 (Manjushi) - AI-powered comic drama video generation platform",
+  "author": "漫剧师 <manjushi@example.com>",
   "license": "MIT",
   "type": "module",
   "scripts": {

@@ -44,7 +44,7 @@ const Footer = () => (
         <a href="/terms" target="_blank">使用条款</a>
       </div>
       <div className={styles.copyright}>
-        <Text type="secondary">Nova © {new Date().getFullYear()} Created by Agions</Text>
+        <Text type="secondary">漫剧师 © {new Date().getFullYear()} Created by 漫剧师团队</Text>
       </div>
     </div>
   </div>
@@ -162,7 +162,7 @@ const MainLayout: React.FC = () => {
     if (path.startsWith('/scripts')) return '剧本管理';
     if (path.startsWith('/templates')) return '模板中心';
     if (path.startsWith('/settings')) return '系统设置';
-    return 'Nova';
+    return '漫剧师';
   };
 
   const renderMenu = () => (
@@ -195,7 +195,7 @@ const MainLayout: React.FC = () => {
           )}
           <div className={styles.logo} onClick={() => navigate('/')}>
             <FireOutlined className={styles.logoIcon} />
-            <span className={styles.logoText}>Nova</span>
+            <span className={styles.logoText}>漫剧师</span>
           </div>
           {!isMobile && (
             <div className={styles.pageTitle}>
@@ -255,7 +255,7 @@ const MainLayout: React.FC = () => {
             title={
               <div className={styles.drawerHeader}>
                 <FireOutlined className={styles.logoIcon} />
-                <span className={styles.logoText}>Nova</span>
+                <span className={styles.logoText}>漫剧师</span>
               </div>
             }
             placement="left"
