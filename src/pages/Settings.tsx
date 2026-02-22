@@ -1,958 +1,437 @@
 /**
- * 系统设置页面
- * 管理应用配置、API密钥及系统设置
- * 
- * @author Agions
- * @date 2024
- * @version 2.0
- * @description 基于Ant Design的高级设置界面，支持AI模型配置与系统设置
+ * 专业设置页面
  */
-import React, { useState, useEffect, useContext, useCallback } from 'react';
-import {
-  Card,
-  Tabs,
-  Input,
-  Button,
-  Form,
-  message,
-  Switch,
-  Space,
-  Row,
-  Col,
-  Tag,
-  Tooltip,
-  Alert,
+
+import React, { useState } from 'react';
+import { 
+  Card, 
+  Tabs, 
+  Form, 
+  Input, 
+  Button, 
+  Switch, 
+  Space, 
+  Tag, 
   Typography,
   Divider,
-  Badge,
-  Skeleton,
-  Collapse,
+  List,
   Avatar,
-  notification,
-  Select
+  Badge,
+  Select,
+  InputNumber,
+  Slider,
+  Alert,
+  Row,
+  Col,
+  Progress
 } from 'antd';
-import {
-  ApiOutlined,
+import { 
+  ApiOutlined, 
+  SettingOutlined, 
+  UserOutlined, 
+  BellOutlined, 
+  SafetyOutlined,
+  CloudOutlined,
+  ThunderboltOutlined,
+  KeyOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  CodeOutlined,
-  CloudOutlined,
-  DatabaseOutlined,
-  ExperimentOutlined,
-  InfoCircleOutlined,
-  LockOutlined,
-  RocketOutlined,
-  SettingOutlined,
-  ThunderboltOutlined,
-  BulbOutlined,
-  TranslationOutlined,
-  CheckOutlined,
-  CloseOutlined,
   QuestionCircleOutlined,
-  GlobalOutlined,
-  KeyOutlined,
-  PlusCircleOutlined,
-  ExclamationCircleOutlined,
-  ClockCircleOutlined,
-  DashboardOutlined,
-  RobotOutlined,
-  SecurityScanOutlined
+  InfoCircleOutlined,
+  EditOutlined,
+  PlusOutlined,
+  DeleteOutlined
 } from '@ant-design/icons';
 import styles from './Settings.module.less';
-import ThemeContext from '../context/ThemeContext';
-import AIModelSelector from '../components/business/AIModelSelector';
-import useTranslation from '../utils/i18n';
 
-// 手动定义ModelProvider类型
-type ModelProvider = 'openai' | 'anthropic' | 'google' | 'baidu' | 'iflytek' | 'alibaba' | 'tencent' | 'zhipu' | 'moonshot';
-
+const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
-const { Text, Title, Paragraph } = Typography;
-const { Option } = Select;
 
-interface ApiKeyState {
-  value: string;
-  isValid: boolean | null;
-  isTesting: boolean;
-}
-
-// 自定义钩子
-function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((prevValue: T) => T)) => void] {
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.error(error);
-      return initialValue;
-    }
-  });
-
-  const setValue = (value: T | ((prevValue: T) => T)) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  return [storedValue, setValue];
-};
-
-// API验证服务
-const validateApiKey = async (type: string, apiKey: string): Promise<boolean> => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      let valid = apiKey.length > 10;
-      
-      if (type === 'openai' && !apiKey.startsWith('sk-')) valid = false;
-      if (type === 'anthropic' && !apiKey.startsWith('sk-ant-')) valid = false;
-      if (type === 'google' && !apiKey.startsWith('AIza')) valid = false;
-      if (type === 'baidu' && apiKey.length < 20) valid = false;
-      if (type === 'iflytek' && apiKey.length < 20) valid = false;
-      if (type === 'alibaba' && apiKey.length < 20) valid = false;
-      if (type === 'tencent' && apiKey.length < 20) valid = false;
-      if (type === 'zhipu' && apiKey.length < 20) valid = false;
-      if (type === 'moonshot' && apiKey.length < 20) valid = false;
-      
-      resolve(valid);
-    }, 1000);
-  });
-};
-
-// 添加模型定义
-const models = [
-  { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
-  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', provider: 'openai' },
-  { id: 'claude-3-opus', name: 'Claude 3 Opus', provider: 'anthropic' },
-  { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', provider: 'anthropic' },
-  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'google' },
-  // 添加国内大模型
-  { id: 'ernie-4.0', name: '文心一言4.0', provider: 'baidu' },
-  { id: 'spark-3.5', name: '讯飞星火3.5', provider: 'iflytek' },
-  { id: 'qwen-turbo', name: '通义千问', provider: 'alibaba' },
-  { id: 'qwen-plus', name: '通义千问Plus', provider: 'alibaba' },
-  { id: 'hunyuan', name: '腾讯混元', provider: 'tencent' },
-  { id: 'chatglm4-9b', name: 'ChatGLM4-9B', provider: 'zhipu' },
-  { id: 'chatglm4-32k', name: 'ChatGLM4-32K', provider: 'zhipu' },
-  { id: 'moonshot-v1-8k', name: 'Moonshot V1', provider: 'moonshot' },
-  { id: 'moonshot-v1-32k', name: 'Moonshot V1-32K', provider: 'moonshot' },
+// API 密钥配置
+const apiProviders = [
+  { 
+    key: 'openai', 
+    name: 'OpenAI', 
+    logo: '🤖',
+    models: ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+    color: '#10a37f'
+  },
+  { 
+    key: 'anthropic', 
+    name: 'Anthropic', 
+    logo: '🧠',
+    models: ['claude-3-opus', 'claude-3-sonnet', 'claude-3-haiku'],
+    color: '#d4a373'
+  },
+  { 
+    key: 'baidu', 
+    name: '百度', 
+    logo: '🔍',
+    models: ['ernie-4', 'ernie-3.5'],
+    color: '#2932e1'
+  },
+  { 
+    key: 'alibaba', 
+    name: '阿里', 
+    logo: '☁️',
+    models: ['qwen-turbo', 'qwen-plus', 'qwen-max'],
+    color: '#ff6a00'
+  },
+  { 
+    key: 'zhipu', 
+    name: '智谱', 
+    logo: '📊',
+    models: ['glm-4', 'glm-3-turbo'],
+    color: '#5e72e4'
+  },
 ];
 
-// 明确的声明Settings组件类型
 const Settings: React.FC = () => {
-  const themeContext = useContext(ThemeContext);
-  const isDarkMode = themeContext?.isDarkMode || false;
-  const [form] = Form.useForm();
-  const { t, language, changeLanguage } = useTranslation();
-  
-  const [activeTab, setActiveTab] = useState('models');
-  const [isLoading, setIsLoading] = useState(true);
-  
-  const [openaiApiKey, setOpenaiApiKey] = useLocalStorage<ApiKeyState>('openai_api_key', {
-    value: '',
-    isValid: null,
-    isTesting: false
-  });
-  
-  const [anthropicApiKey, setAnthropicApiKey] = useLocalStorage<ApiKeyState>('anthropic_api_key', {
-    value: '',
-    isValid: null,
-    isTesting: false
-  });
-  
-  const [googleApiKey, setGoogleApiKey] = useLocalStorage<ApiKeyState>('google_api_key', {
-    value: '',
-    isValid: null,
-    isTesting: false
-  });
-  
-  const [baiduApiKey, setBaiduApiKey] = useLocalStorage<ApiKeyState>('baidu_api_key', {
-    value: '',
-    isValid: null,
-    isTesting: false
-  });
-  
-  const [iflytekApiKey, setIflytekApiKey] = useLocalStorage<ApiKeyState>('iflytek_api_key', {
-    value: '',
-    isValid: null,
-    isTesting: false
-  });
-  
-  const [alibabaApiKey, setAlibabaApiKey] = useLocalStorage<ApiKeyState>('alibaba_api_key', {
-    value: '',
-    isValid: null,
-    isTesting: false
-  });
-  
-  const [tencentApiKey, setTencentApiKey] = useLocalStorage<ApiKeyState>('tencent_api_key', {
-    value: '',
-    isValid: null,
-    isTesting: false
-  });
-  
-  const [zhipuApiKey, setZhipuApiKey] = useLocalStorage<ApiKeyState>('zhipu_api_key', {
-    value: '',
-    isValid: null,
-    isTesting: false
-  });
-  
-  const [moonshotApiKey, setMoonshotApiKey] = useLocalStorage<ApiKeyState>('moonshot_api_key', {
-    value: '',
-    isValid: null,
-    isTesting: false
-  });
-  
-  const [autoSave, setAutoSave] = useLocalStorage<boolean>('auto_save', true);
-  const [autoUpdate, setAutoUpdate] = useLocalStorage<boolean>('auto_update', true);
-  const [showLineNumbers, setShowLineNumbers] = useLocalStorage<boolean>('show_line_numbers', true);
-  const [enableTranscode, setEnableTranscode] = useLocalStorage<boolean>('enable_transcode', false);
-  const [highQualityExport, setHighQualityExport] = useLocalStorage<boolean>('high_quality_export', true);
-  const [defaultModelIndex, setDefaultModelIndex] = useLocalStorage<number>('default_model_index', 0);
-  
-  // 添加缺失的状态变量声明
-  const [apiTesting, setApiTesting] = useState<Record<string, boolean>>({
-    openai: false,
-    anthropic: false,
-    google: false,
-    baidu: false,
-    iflytek: false,
-    alibaba: false,
-    tencent: false,
-    zhipu: false,
-    moonshot: false
+  const [activeTab, setActiveTab] = useState('api');
+  const [apiKeys, setApiKeys] = useState<Record<string, string>>({
+    openai: '',
+    anthropic: '',
+    baidu: '',
+    alibaba: '',
+    zhipu: ''
   });
 
-  const [apiKeyStatus, setApiKeyStatus] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  // 简化表单初始化
-  useEffect(() => {
-    form.resetFields();
-  }, [form]);
-
-  const testApiKey = async (type: string, apiKey: string) => {
-    if (!apiKey) {
-      message.warning('请先输入API密钥');
-      return;
-    }
-    
-    switch (type) {
-      case 'openai':
-        setOpenaiApiKey(prev => ({ ...prev, isTesting: true }));
-        try {
-          const isValid = await validateApiKey(type, apiKey);
-          setOpenaiApiKey(prev => ({ ...prev, isValid, isTesting: false }));
-          
-          if (isValid) {
-            message.success(`OpenAI API密钥验证成功`);
-          } else {
-            message.error(`OpenAI API密钥验证失败`);
-          }
-        } catch (error) {
-          setOpenaiApiKey(prev => ({ ...prev, isValid: false, isTesting: false }));
-          message.error(`验证过程中出错: ${(error as Error).message}`);
-        }
-        break;
-      case 'anthropic':
-        setAnthropicApiKey(prev => ({ ...prev, isTesting: true }));
-        try {
-          const isValid = await validateApiKey(type, apiKey);
-          setAnthropicApiKey(prev => ({ ...prev, isValid, isTesting: false }));
-          
-          if (isValid) {
-            message.success(`Anthropic API密钥验证成功`);
-          } else {
-            message.error(`Anthropic API密钥验证失败`);
-          }
-        } catch (error) {
-          setAnthropicApiKey(prev => ({ ...prev, isValid: false, isTesting: false }));
-          message.error(`验证过程中出错: ${(error as Error).message}`);
-        }
-        break;
-      case 'google':
-        setGoogleApiKey(prev => ({ ...prev, isTesting: true }));
-        try {
-          const isValid = await validateApiKey(type, apiKey);
-          setGoogleApiKey(prev => ({ ...prev, isValid, isTesting: false }));
-          
-          if (isValid) {
-            message.success(`Google API密钥验证成功`);
-          } else {
-            message.error(`Google API密钥验证失败`);
-          }
-        } catch (error) {
-          setGoogleApiKey(prev => ({ ...prev, isValid: false, isTesting: false }));
-          message.error(`验证过程中出错: ${(error as Error).message}`);
-        }
-        break;
-      case 'baidu':
-        setBaiduApiKey(prev => ({ ...prev, isTesting: true }));
-        try {
-          const isValid = await validateApiKey(type, apiKey);
-          setBaiduApiKey(prev => ({ ...prev, isValid, isTesting: false }));
-          
-          if (isValid) {
-            message.success(`百度文心一言API密钥验证成功`);
-          } else {
-            message.error(`百度文心一言API密钥验证失败`);
-          }
-        } catch (error) {
-          setBaiduApiKey(prev => ({ ...prev, isValid: false, isTesting: false }));
-          message.error(`验证过程中出错: ${(error as Error).message}`);
-        }
-        break;
-      case 'iflytek':
-        setIflytekApiKey(prev => ({ ...prev, isTesting: true }));
-        try {
-          const isValid = await validateApiKey(type, apiKey);
-          setIflytekApiKey(prev => ({ ...prev, isValid, isTesting: false }));
-          
-          if (isValid) {
-            message.success(`讯飞星火API密钥验证成功`);
-          } else {
-            message.error(`讯飞星火API密钥验证失败`);
-          }
-        } catch (error) {
-          setIflytekApiKey(prev => ({ ...prev, isValid: false, isTesting: false }));
-          message.error(`验证过程中出错: ${(error as Error).message}`);
-        }
-        break;
-      case 'alibaba':
-        setAlibabaApiKey(prev => ({ ...prev, isTesting: true }));
-        try {
-          const isValid = await validateApiKey(type, apiKey);
-          setAlibabaApiKey(prev => ({ ...prev, isValid, isTesting: false }));
-          
-          if (isValid) {
-            message.success(`阿里通义千问API密钥验证成功`);
-          } else {
-            message.error(`阿里通义千问API密钥验证失败`);
-          }
-        } catch (error) {
-          setAlibabaApiKey(prev => ({ ...prev, isValid: false, isTesting: false }));
-          message.error(`验证过程中出错: ${(error as Error).message}`);
-        }
-        break;
-      case 'tencent':
-        setTencentApiKey(prev => ({ ...prev, isTesting: true }));
-        try {
-          const isValid = await validateApiKey(type, apiKey);
-          setTencentApiKey(prev => ({ ...prev, isValid, isTesting: false }));
-          
-          if (isValid) {
-            message.success(`腾讯混元API密钥验证成功`);
-          } else {
-            message.error(`腾讯混元API密钥验证失败`);
-          }
-        } catch (error) {
-          setTencentApiKey(prev => ({ ...prev, isValid: false, isTesting: false }));
-          message.error(`验证过程中出错: ${(error as Error).message}`);
-        }
-        break;
-      case 'zhipu':
-        setZhipuApiKey(prev => ({ ...prev, isTesting: true }));
-        try {
-          const isValid = await validateApiKey(type, apiKey);
-          setZhipuApiKey(prev => ({ ...prev, isValid, isTesting: false }));
-          
-          if (isValid) {
-            message.success(`智谱ChatGLM API密钥验证成功`);
-          } else {
-            message.error(`智谱ChatGLM API密钥验证失败`);
-          }
-        } catch (error) {
-          setZhipuApiKey(prev => ({ ...prev, isValid: false, isTesting: false }));
-          message.error(`验证过程中出错: ${(error as Error).message}`);
-        }
-        break;
-      case 'moonshot':
-        setMoonshotApiKey(prev => ({ ...prev, isTesting: true }));
-        try {
-          const isValid = await validateApiKey(type, apiKey);
-          setMoonshotApiKey(prev => ({ ...prev, isValid, isTesting: false }));
-          
-          if (isValid) {
-            message.success(`Moonshot API密钥验证成功`);
-          } else {
-            message.error(`Moonshot API密钥验证失败`);
-          }
-        } catch (error) {
-          setMoonshotApiKey(prev => ({ ...prev, isValid: false, isTesting: false }));
-          message.error(`验证过程中出错: ${(error as Error).message}`);
-        }
-        break;
-      default:
-        return;
-    }
+  const handleSaveApiKey = (provider: string) => {
+    console.log('保存 API Key:', provider);
   };
 
-  const setAsDefault = (index: number) => {
-    setDefaultModelIndex(index);
-    message.success('默认模型已更新');
-  };
-
-  const handleModelChange = (modelId: string) => {
-    setDefaultModelIndex(models.findIndex(model => model.id === modelId));
-    message.success('默认模型已更新');
-  };
-
-  const handleConfigureAPI = (provider: ModelProvider) => {
-    // 根据 provider 确定要编辑的 API 设置
-    switch(provider) {
-      case 'openai':
-        setActiveTab('api');
-        // 聚焦到 OpenAI 输入框
-        setTimeout(() => {
-          const openaiInput = document.getElementById('openai-api-key');
-          if (openaiInput) {
-            (openaiInput as HTMLInputElement).focus();
-          }
-        }, 300);
-        break;
-      case 'anthropic':
-        setActiveTab('api');
-        // 聚焦到 Anthropic 输入框
-        setTimeout(() => {
-          const anthropicInput = document.getElementById('anthropic-api-key');
-          if (anthropicInput) {
-            (anthropicInput as HTMLInputElement).focus();
-          }
-        }, 300);
-        break;
-      case 'baidu':
-        setActiveTab('api');
-        // 聚焦到百度输入框
-        setTimeout(() => {
-          const baiduInput = document.getElementById('baidu-api-key');
-          if (baiduInput) {
-            (baiduInput as HTMLInputElement).focus();
-          }
-        }, 300);
-        break;
-      case 'iflytek':
-        setActiveTab('api');
-        // 聚焦到讯飞输入框
-        setTimeout(() => {
-          const iflytekInput = document.getElementById('iflytek-api-key');
-          if (iflytekInput) {
-            (iflytekInput as HTMLInputElement).focus();
-          }
-        }, 300);
-        break;
-      case 'alibaba':
-        setActiveTab('api');
-        // 聚焦到阿里输入框
-        setTimeout(() => {
-          const alibabaInput = document.getElementById('alibaba-api-key');
-          if (alibabaInput) {
-            (alibabaInput as HTMLInputElement).focus();
-          }
-        }, 300);
-        break;
-      case 'tencent':
-        setActiveTab('api');
-        // 聚焦到腾讯输入框
-        setTimeout(() => {
-          const tencentInput = document.getElementById('tencent-api-key');
-          if (tencentInput) {
-            (tencentInput as HTMLInputElement).focus();
-          }
-        }, 300);
-        break;
-      case 'zhipu':
-        setActiveTab('api');
-        // 聚焦到智谱输入框
-        setTimeout(() => {
-          const zhipuInput = document.getElementById('zhipu-api-key');
-          if (zhipuInput) {
-            (zhipuInput as HTMLInputElement).focus();
-          }
-        }, 300);
-        break;
-      case 'moonshot':
-        setActiveTab('api');
-        // 聚焦到Moonshot输入框
-        setTimeout(() => {
-          const moonshotInput = document.getElementById('moonshot-api-key');
-          if (moonshotInput) {
-            (moonshotInput as HTMLInputElement).focus();
-          }
-        }, 300);
-        break;
-      // 可以添加其他提供商的处理逻辑
-      default:
-        setActiveTab('api');
-        message.info(`请配置 ${provider} 的 API 密钥`);
-    }
-  };
-
-  const renderSwitchItem = (
-    label: string,
-    description: string,
-    value: boolean,
-    onChange: (checked: boolean) => void,
-    icon: React.ReactNode
-  ) => (
-    <div className={styles.switchItem}>
-      <div className={styles.settingRow}>
-        {icon}
-        <span className={styles.switchLabel}>{label}</span>
-        <Switch checked={value} onChange={onChange} />
-      </div>
-      <div className={styles.settingDescription}>{description}</div>
-    </div>
-  );
-
-  const handleFormFinish = (values: any) => {
-    console.log('保存设置:', values);
-    notification.success({
-      message: '设置已保存',
-      description: '您的设置已成功保存并应用',
-      placement: 'bottomRight',
-    });
-  };
-
-  const handleTestApiKey = async (provider: string) => {
-    setApiTesting(prev => ({ ...prev, [provider]: true }));
-    const keyFieldName = `${provider}ApiKey`;
-    const apiKey = form.getFieldValue(keyFieldName);
-    
-    if (!apiKey) {
-      notification.error({
-        message: 'API密钥缺失',
-        description: '请输入API密钥后再进行测试',
-        placement: 'bottomRight',
-      });
-      setApiTesting(prev => ({ ...prev, [provider]: false }));
-      return;
-    }
-    
-    try {
-      const isValid = await validateApiKey(provider, apiKey);
-      setApiKeyStatus(prev => ({ ...prev, [provider]: isValid }));
-      
-      if (isValid) {
-        notification.success({
-          message: 'API密钥有效',
-          description: `${provider}的API密钥验证成功`,
-          placement: 'bottomRight',
-        });
-      } else {
-        notification.error({
-          message: 'API密钥无效',
-          description: `${provider}的API密钥验证失败，请检查密钥是否正确`,
-          placement: 'bottomRight',
-        });
-      }
-    } catch (error) {
-      console.error('API密钥验证错误:', error);
-      notification.error({
-        message: '验证出错',
-        description: '验证API密钥时发生错误，请稍后再试',
-        placement: 'bottomRight',
-      });
-    } finally {
-      setApiTesting(prev => ({ ...prev, [provider]: false }));
-    }
-  };
-
-  const renderApiKeyInput = (provider: string, label: string, placeholder: string, example: string) => {
-    const keyFieldName = `${provider}ApiKey`;
-    
-    return (
-      <div className={styles.section}>
-        <div className={styles.sectionTitle}>{label}</div>
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Form.Item name={keyFieldName} noStyle>
-            <Input.Password
-              className={styles.apiKeyInput}
-              placeholder={placeholder}
-              prefix={<KeyOutlined />}
-              autoComplete="off"
-              size="large"
-              addonAfter={
-                <Button 
-                  loading={apiTesting[provider]} 
-                  onClick={() => handleTestApiKey(provider)}
-                  className={styles.testButton}
-                >
-                  测试
-                </Button>
-              }
-            />
-          </Form.Item>
-          
-          {apiKeyStatus[provider] !== undefined && (
-            <div className={apiKeyStatus[provider] ? styles.success : styles.error}>
-              {apiKeyStatus[provider] ? (
-                <Space>
-                  <CheckOutlined />
-                  <span>API密钥有效</span>
-                </Space>
-              ) : (
-                <Space>
-                  <CloseOutlined />
-                  <span>API密钥无效</span>
-                </Space>
+  const tabItems = [
+    {
+      key: 'api',
+      label: (
+        <span>
+          <ApiOutlined /> API 配置
+        </span>
+      ),
+      children: (
+        <div className={styles.tabContent}>
+          <div className={styles.section}>
+            <Title level={4}>AI 模型 API</Title>
+            <Paragraph type="secondary">
+              配置您使用的 AI 服务商 API 密钥，不同服务商支持不同的模型。
+            </Paragraph>
+            
+            <List
+              dataSource={apiProviders}
+              renderItem={(provider) => (
+                <Card className={styles.providerCard} key={provider.key}>
+                  <div className={styles.providerHeader}>
+                    <div className={styles.providerInfo}>
+                      <span className={styles.providerLogo}>{provider.logo}</span>
+                      <span className={styles.providerName}>{provider.name}</span>
+                      {apiKeys[provider.key] ? (
+                        <Tag color="success" icon={<CheckCircleOutlined />}>已配置</Tag>
+                      ) : (
+                        <Tag icon={<CloseCircleOutlined />}>未配置</Tag>
+                      )}
+                    </div>
+                    <Button 
+                      type="link" 
+                      icon={<EditOutlined />}
+                      onClick={() => handleSaveApiKey(provider.key)}
+                    >
+                      {apiKeys[provider.key] ? '修改' : '添加'}
+                    </Button>
+                  </div>
+                  
+                  <div className={styles.modelSelect}>
+                    <Text type="secondary">选择模型：</Text>
+                    <Select
+                      defaultValue={provider.models[0]}
+                      style={{ width: 200 }}
+                      options={provider.models.map(m => ({ label: m, value: m }))}
+                    />
+                  </div>
+                </Card>
               )}
-            </div>
-          )}
-          
-          <div style={{ fontSize: '13px', opacity: 0.7 }}>
-            <Text type="secondary">
-              示例: {example}
-            </Text>
+            />
           </div>
-        </Space>
-      </div>
-    );
-  };
 
-  if (isLoading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <Skeleton active paragraph={{ rows: 10 }} />
+          <Divider />
+
+          <div className={styles.section}>
+            <Title level={4}>API 使用统计</Title>
+            <Row gutter={[16, 16]}>
+              <Col xs={24} sm={8}>
+                <Card className={styles.statCard}>
+                  <div className={styles.statIcon} style={{ background: '#e0e7ff', color: '#6366f1' }}>
+                    <ThunderboltOutlined />
+                  </div>
+                  <div className={styles.statInfo}>
+                    <Text type="secondary">本月调用</Text>
+                    <Title level={3}>1,234</Title>
+                  </div>
+                </Card>
+              </Col>
+              <Col xs={24} sm={8}>
+                <Card className={styles.statCard}>
+                  <div className={styles.statIcon} style={{ background: '#fef3c7', color: '#f59e0b' }}>
+                    <KeyOutlined />
+                  </div>
+                  <div className={styles.statInfo}>
+                    <Text type="secondary">消耗 Tokens</Text>
+                    <Title level={3}>567K</Title>
+                  </div>
+                </Card>
+              </Col>
+              <Col xs={24} sm={8}>
+                <Card className={styles.statCard}>
+                  <div className={styles.statIcon} style={{ background: '#d1fae5', color: '#10b981' }}>
+                    <CheckCircleOutlined />
+                  </div>
+                  <div className={styles.statInfo}>
+                    <Text type="secondary">成功调用</Text>
+                    <Title level={3}>98.5%</Title>
+                  </div>
+                </Card>
+              </Col>
+            </Row>
+          </div>
         </div>
-      </div>
-    );
-  }
+      )
+    },
+    {
+      key: 'general',
+      label: (
+        <span>
+          <SettingOutlined /> 通用设置
+        </span>
+      ),
+      children: (
+        <div className={styles.tabContent}>
+          <div className={styles.section}>
+            <Title level={4}>基本设置</Title>
+            
+            <Form layout="vertical">
+              <Form.Item label="项目保存路径">
+                <Input 
+                  placeholder="/Users/username/ClipAiMan/projects" 
+                  suffix={<Button type="text" size="small">浏览</Button>}
+                />
+              </Form.Item>
+              
+              <Form.Item label="默认视频分辨率">
+                <Select
+                  defaultValue="1080p"
+                  options={[
+                    { label: '720p', value: '720p' },
+                    { label: '1080p', value: '1080p' },
+                    { label: '2K', value: '2k' },
+                    { label: '4K', value: '4k' },
+                  ]}
+                />
+              </Form.Item>
+              
+              <Form.Item label="默认帧率">
+                <Select
+                  defaultValue="24"
+                  options={[
+                    { label: '24 fps', value: '24' },
+                    { label: '30 fps', value: '30' },
+                    { label: '60 fps', value: '60' },
+                  ]}
+                />
+              </Form.Item>
+              
+              <Form.Item label="自动保存间隔">
+                <InputNumber min={1} max={60} defaultValue={5} />
+                <Text type="secondary" style={{ marginLeft: 8 }}>分钟</Text>
+              </Form.Item>
+            </Form>
+          </div>
+
+          <Divider />
+
+          <div className={styles.section}>
+            <Title level={4}>开关设置</Title>
+            
+            <div className={styles.switchItem}>
+              <div className={styles.switchInfo}>
+                <Text strong>自动保存项目</Text>
+                <Text type="secondary">工作进度自动保存到本地</Text>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            
+            <div className={styles.switchItem}>
+              <div className={styles.switchInfo}>
+                <Text strong>显示高级选项</Text>
+                <Text type="secondary">在界面中显示更多高级配置</Text>
+              </div>
+              <Switch />
+            </div>
+            
+            <div className={styles.switchItem}>
+              <div className={styles.switchInfo}>
+                <Text strong>启用快捷键</Text>
+                <Text type="secondary">使用键盘快捷键提高效率</Text>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            
+            <div className={styles.switchItem}>
+              <div className={styles.switchInfo}>
+                <Text strong>启动时检查更新</Text>
+                <Text type="secondary">自动检查新版本并提示更新</Text>
+              </div>
+              <Switch defaultChecked />
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'account',
+      label: (
+        <span>
+          <UserOutlined /> 账户
+        </span>
+      ),
+      children: (
+        <div className={styles.tabContent}>
+          <Card className={styles.accountCard}>
+            <div className={styles.accountInfo}>
+              <Avatar size={80} className={styles.avatar}>
+                <UserOutlined />
+              </Avatar>
+              <div className={styles.accountDetail}>
+                <Title level={4}>用户账户</Title>
+                <Text type="secondary">创建时间：2026-02-15</Text>
+                <div className={styles.accountTags}>
+                  <Tag color="blue">免费版</Tag>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Divider />
+
+          <div className={styles.section}>
+            <Title level={4}>账户设置</Title>
+            
+            <Form layout="vertical">
+              <Form.Item label="显示名称">
+                <Input placeholder="输入您的名称" />
+              </Form.Item>
+              
+              <Form.Item label="邮箱">
+                <Input placeholder="your@email.com" />
+              </Form.Item>
+              
+              <Button type="primary">保存更改</Button>
+            </Form>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'notification',
+      label: (
+        <span>
+          <BellOutlined /> 通知
+        </span>
+      ),
+      children: (
+        <div className={styles.tabContent}>
+          <div className={styles.section}>
+            <Title level={4}>通知设置</Title>
+            
+            <div className={styles.switchItem}>
+              <div className={styles.switchInfo}>
+                <Text strong>项目完成通知</Text>
+                <Text type="secondary">项目生成完成时推送通知</Text>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            
+            <div className={styles.switchItem}>
+              <div className={styles.switchInfo}>
+                <Text strong>错误提醒</Text>
+                <Text type="secondary">发生错误时推送通知</Text>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            
+            <div className={styles.switchItem}>
+              <div className={styles.switchInfo}>
+                <Text strong>API 配额提醒</Text>
+                <Text type="secondary">API 使用达到 80% 时提醒</Text>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            
+            <div className={styles.switchItem}>
+              <div className={styles.switchInfo}>
+                <Text strong>更新推送</Text>
+                <Text type="secondary">新版本发布时推送通知</Text>
+              </div>
+              <Switch />
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'about',
+      label: (
+        <span>
+          <InfoCircleOutlined /> 关于
+        </span>
+      ),
+      children: (
+        <div className={styles.tabContent}>
+          <Card className={styles.aboutCard}>
+            <div className={styles.aboutHeader}>
+              <Title level={2}>🎬 ClipAiMan</Title>
+              <Text type="secondary">AI 漫剧视频智能创作平台</Text>
+            </div>
+            
+            <div className={styles.aboutInfo}>
+              <div className={styles.infoItem}>
+                <Text type="secondary">版本</Text>
+                <Text>v2.1.0</Text>
+              </div>
+              <div className={styles.infoItem}>
+                <Text type="secondary">构建时间</Text>
+                <Text>2026-02-22</Text>
+              </div>
+              <div className={styles.infoItem}>
+                <Text type="secondary">许可证</Text>
+                <Text>MIT</Text>
+              </div>
+            </div>
+            
+            <Divider />
+            
+            <Alert
+              type="info"
+              showIcon
+              message="感谢使用 ClipAiMan"
+              description="如有问题或建议，请提交 Issue 或联系开发者。"
+            />
+          </Card>
+        </div>
+      )
+    }
+  ];
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <Title level={2}>设置</Title>
-        <Paragraph type="secondary">自定义您的应用程序设置和AI模型配置</Paragraph>
-      </div>
-      
-      <Card 
-        className={`${styles.settingsCard} ${isDarkMode ? styles.darkCard : ''}`}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{}}
-          onFinish={handleFormFinish}
-          className={styles.form}
-        >
-          <Tabs
-            activeKey={activeTab}
-            onChange={setActiveTab}
-            className={styles.tabs}
-            tabPosition="left"
-          >
-            <TabPane 
-              tab={<span><RobotOutlined /> {t('settings.models')}</span>} 
-              key="models"
-            >
-              <Alert
-                className={styles.alert}
-                message={t('settings.models.message')}
-                description={t('settings.models.description')}
-                type="info"
-                showIcon
-                icon={<InfoCircleOutlined />}
-              />
-              
-              <h3 className={styles.sectionTitle}>{t('settings.models.available')}</h3>
-              
-              <Alert
-                message={t('settings.models.selectPreferred')}
-                description={t('settings.models.canChange')}
-                type="info"
-                showIcon
-                style={{ marginBottom: 20 }}
-              />
-              
-              <AIModelSelector 
-                selectedModel={models[defaultModelIndex]?.id || 'gpt-3.5-turbo'}
-                onChange={handleModelChange}
-                onConfigureAPI={handleConfigureAPI}
-              />
-            </TabPane>
-            
-            <TabPane 
-              tab={<span><KeyOutlined /> API密钥</span>}
-              key="api"
-            >
-              <Alert
-                className={styles.alert}
-                message={t('settings.api.message')}
-                description={t('settings.api.description')}
-                type="info"
-                showIcon
-                icon={<InfoCircleOutlined />}
-              />
-              
-              <h3 className={styles.sectionTitle}>{t('settings.api.keyConfig')}</h3>
-              
-              {renderApiKeyInput(
-                'openai',
-                'OpenAI API密钥',
-                '输入您的OpenAI API密钥',
-                'sk-abcdefgh123456789...'
-              )}
-              
-              {renderApiKeyInput(
-                'anthropic',
-                'Anthropic API密钥',
-                '输入您的Anthropic API密钥',
-                'sk-ant-api03-abcdefgh123456789...'
-              )}
-              
-              {renderApiKeyInput(
-                'google',
-                'Google AI API密钥',
-                '输入您的Google AI API密钥',
-                'AIzaSyAbCdEfGhIjKlMnOpQrStuVwXyZ...'
-              )}
-              
-              <h3 className={styles.sectionTitle}>{t('settings.api.domesticServices')}</h3>
-              
-              {renderApiKeyInput(
-                'baidu',
-                '百度文心一言 API密钥',
-                '输入您的文心一言API密钥',
-                'API密钥与密钥格式请参考百度智能云文档'
-              )}
-              
-              {renderApiKeyInput(
-                'iflytek',
-                '讯飞星火 API密钥',
-                '输入您的讯飞星火API密钥',
-                'API密钥与密钥格式请参考讯飞开放平台文档'
-              )}
-              
-              {renderApiKeyInput(
-                'alibaba',
-                '阿里通义千问 API密钥',
-                '输入您的通义千问API密钥',
-                'API密钥与密钥格式请参考通义千问API文档'
-              )}
-              
-              {renderApiKeyInput(
-                'tencent',
-                '腾讯混元 API密钥',
-                '输入您的腾讯混元API密钥',
-                'API密钥与密钥格式请参考腾讯混元API文档'
-              )}
-              
-              {renderApiKeyInput(
-                'zhipu',
-                '智谱ChatGLM API密钥',
-                '输入您的智谱ChatGLM API密钥',
-                'API密钥与密钥格式请参考智谱AI开放平台文档'
-              )}
-              
-              {renderApiKeyInput(
-                'moonshot',
-                'Moonshot API密钥',
-                '输入您的Moonshot API密钥',
-                'API密钥与密钥格式请参考Moonshot AI文档'
-              )}
-              
-              <Alert
-                message={t('settings.api.howToGet')}
-                description={
-                  <ul style={{ marginTop: 10, paddingLeft: 20 }}>
-                    <li>OpenAI API密钥：<a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">https://platform.openai.com/api-keys</a></li>
-                    <li>Anthropic API密钥：<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">https://console.anthropic.com/settings/keys</a></li>
-                    <li>Google AI API密钥：<a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer">https://makersuite.google.com/app/apikey</a></li>
-                    <li>百度文心一言：<a href="https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Dlkm79mnx" target="_blank" rel="noopener noreferrer">百度智能云文档</a></li>
-                    <li>讯飞星火：<a href="https://www.xfyun.cn/doc/spark/General_guide.html" target="_blank" rel="noopener noreferrer">讯飞开放平台文档</a></li>
-                    <li>阿里通义千问：<a href="https://help.aliyun.com/document_detail/2400396.html" target="_blank" rel="noopener noreferrer">阿里云文档</a></li>
-                    <li>腾讯混元：<a href="https://cloud.tencent.com/document/product/1729" target="_blank" rel="noopener noreferrer">腾讯云文档</a></li>
-                    <li>智谱ChatGLM：<a href="https://open.bigmodel.cn/dev/api" target="_blank" rel="noopener noreferrer">智谱AI开放平台</a></li>
-                    <li>Moonshot AI：<a href="https://platform.moonshot.cn/docs" target="_blank" rel="noopener noreferrer">Moonshot平台文档</a></li>
-                  </ul>
-                }
-                type="info"
-                showIcon
-                className={styles.alert}
-                style={{ marginTop: 24 }}
-              />
-            </TabPane>
-            
-            <TabPane 
-              tab={<span><SettingOutlined /> {t('settings.general')}</span>} 
-              key="general"
-            >
-              <h3 className={styles.sectionTitle}>{t('settings.general.title')}</h3>
-              
-              <Form className={styles.form} layout="vertical">
-                {renderSwitchItem(
-                  t('settings.general.autoSave'),
-                  t('settings.general.autoSaveDesc'),
-                  autoSave,
-                  setAutoSave,
-                  <DatabaseOutlined />
-                )}
-                
-                {renderSwitchItem(
-                  t('settings.general.lineNumbers'),
-                  t('settings.general.lineNumbersDesc'),
-                  showLineNumbers,
-                  setShowLineNumbers,
-                  <CodeOutlined />
-                )}
-                
-                {renderSwitchItem(
-                  t('settings.general.autoUpdate'),
-                  t('settings.general.autoUpdateDesc'),
-                  autoUpdate,
-                  setAutoUpdate,
-                  <RocketOutlined />
-                )}
-                
-                <Divider />
-                
-                <h3 className={styles.sectionTitle}>{t('settings.general.performance')}</h3>
-                
-                {renderSwitchItem(
-                  t('settings.general.highQuality'),
-                  t('settings.general.highQualityDesc'),
-                  highQualityExport,
-                  setHighQualityExport,
-                  <BulbOutlined />
-                )}
-                
-                {renderSwitchItem(
-                  t('settings.general.transcode'),
-                  t('settings.general.transcodeDesc'),
-                  enableTranscode,
-                  setEnableTranscode,
-                  <ThunderboltOutlined />
-                )}
-                
-                <Divider />
-                
-                <h3 className={styles.sectionTitle}>{t('settings.general.language')}</h3>
-                
-                <div className={styles.languageSelector}>
-                  <Space>
-                    <GlobalOutlined />
-                    <span>{t('settings.general.language')}</span>
-                    <Select 
-                      value={language} 
-                      onChange={changeLanguage}
-                      style={{ width: 120 }}
-                    >
-                      <Option value="zh">中文</Option>
-                      <Option value="en">English</Option>
-                    </Select>
-                  </Space>
-                  <div className={styles.settingDescription}>
-                    {t('settings.general.languageDesc')}
-                  </div>
-                </div>
-              </Form>
-            </TabPane>
-            
-            <TabPane 
-              tab={<span><InfoCircleOutlined /> {t('settings.about')}</span>} 
-              key="about"
-            >
-              <h3 className={styles.sectionTitle}>{t('app.name')}</h3>
-              
-              <Paragraph>
-                <Text strong>{t('app.name')}</Text> 是一款专业的短视频剪辑工具，集成了AI技术，帮助创作者更高效地创建优质内容。
-              </Paragraph>
-              
-              <Paragraph style={{ marginBottom: 24 }}>
-                <Space direction="vertical">
-                  <Text>版本: 2.0.0</Text>
-                  <Text>作者: Agions</Text>
-                  <Text>发布日期: 2025年5月</Text>
-                </Space>
-              </Paragraph>
-              
-              <h3 className={styles.sectionTitle}>系统要求</h3>
-              
-              <div className={styles.dependencyItem}>
-                <div className={styles.dependencyInfo}>
-                  <Text strong>FFmpeg</Text>
-                  <div className={styles.settingDescription}>
-                    用于视频转码和处理的多媒体框架
-                  </div>
-                </div>
-                <div className={styles.dependencyStatus}>
-                  <Tag color="success">已安装</Tag>
-                </div>
-              </div>
-              
-              <div className={styles.dependencyItem}>
-                <div className={styles.dependencyInfo}>
-                  <Text strong>Python 3.8+</Text>
-                  <div className={styles.settingDescription}>
-                    用于AI模型交互和数据处理
-                  </div>
-                </div>
-                <div className={styles.dependencyStatus}>
-                  <Tag color="success">已安装</Tag>
-                </div>
-              </div>
-              
-              <div className={styles.installInstruction}>
-                <Text strong>如果您遇到任何问题，请检查依赖项是否正确安装：</Text>
-                <Card className={styles.installCard}>
-                  <Paragraph>
-                    FFmpeg安装: <code>brew install ffmpeg</code> (macOS) 或 <code>apt-get install ffmpeg</code> (Linux)
-                  </Paragraph>
-                  <Paragraph style={{ marginBottom: 0 }}>
-                    Python安装: <a href="https://www.python.org/downloads/" target="_blank" rel="noopener noreferrer">https://www.python.org/downloads/</a>
-                  </Paragraph>
-                </Card>
-              </div>
-            </TabPane>
-            
-            <TabPane 
-              tab={<span><LockOutlined /> 隐私</span>} 
-              key="privacy"
-            >
-              <h3 className={styles.sectionTitle}>数据存储</h3>
-              
-              <Paragraph>
-                ClipAiMan高度重视您的隐私。所有API密钥和个人设置仅存储在您的本地设备上，没有任何数据会传输到我们的服务器。
-              </Paragraph>
-              
-              <Paragraph style={{ marginBottom: 24 }}>
-                当您使用第三方AI服务（如OpenAI、Anthropic或Google）时，您的请求将直接发送到这些服务提供商。请查阅各自的隐私政策以了解更多信息。
-              </Paragraph>
-              
-              <Alert
-                message="本地存储位置"
-                description={
-                  <div style={{ marginTop: 8 }}>
-                    <Text code>~/Library/Application Support/ClipAiMan</Text> (macOS)<br />
-                    <Text code>%APPDATA%\ClipAiMan</Text> (Windows)<br />
-                    <Text code>~/.config/clipaiman</Text> (Linux)
-                  </div>
-                }
-                type="info"
-                showIcon
-              />
-            </TabPane>
-          </Tabs>
-          
-          <Form.Item style={{ marginTop: 24 }}>
-            <Button type="primary" htmlType="submit" size="large">
-              保存设置
-            </Button>
-          </Form.Item>
-        </Form>
+    <div className={styles.settings}>
+      <Card className={styles.settingsCard}>
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={tabItems}
+          className={styles.tabs}
+        />
       </Card>
     </div>
   );
 };
 
-export default Settings; 
+export default Settings;
