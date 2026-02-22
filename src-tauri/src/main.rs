@@ -824,7 +824,7 @@ fn random_id() -> String {
 }
 
 fn main() {
-    println!("启动 BlazeCut 应用");
+    println!("启动 ClipAiMan 应用");
     
     tauri::Builder::default()
         .setup(|_app| {
