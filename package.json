@@ -1,8 +1,8 @@
 {
-  "name": "toonai",
+  "name": "comicforge",
   "private": true,
   "version": "2.0.0",
-  "description": "ToonAI - AI-Powered Comic Drama Video Creation Platform",
+  "description": "ComicForge - AI-Powered Comic Drama Video Creation Platform",
   "author": "ClipAiMan <inkmotion@example.com>",
   "license": "MIT",
   "type": "module",
