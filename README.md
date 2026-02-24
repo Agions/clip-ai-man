@@ -32,12 +32,12 @@
 
 ### ✨ 核心优势
 
-- 🤖 **多模型智能调度** — 自动选择最优 AI 模型，支持 OpenAI / Anthropic / 百度 / 阿里 / 智谱 / MiniMax
+- 🤖 **多模型智能调度** — 自动选择最优 AI 模型，支持 OpenAI / Anthropic / 百度 / 阿里 / 智谱
 - 🎭 **角色一致性引擎** — 全剧角色形象、表情、风格、声音保持统一
 - 🔒 **原创性保障** — 内容指纹 + 语义去重 + 模板检测，杜绝重复
 - 💰 **成本可控** — 实时 Token 统计与 API 用量追踪
 - 🎤 **对口型同步** — Wav2Lip / SadTalker / 基础三种模式
-- 📦 **多端支持** — Web / Desktop (Tauri) / Mobile 跨平台
+- 📦 **桌面端支持** — Web / Desktop (Tauri) 跨平台
 - 📋 **丰富模板** — 分镜/场景/角色/风格预置模板
 - 🛡️ **稳定可靠** — 重试机制 + 检查点保存 + 智能缓存
 
@@ -229,7 +229,6 @@ graph TB
     subgraph Platform["平台适配"]
         Web[Web 端]
         Desktop[Desktop 端 Tauri]
-        Mobile[移动端 Taro]
     end
 
     Pages --> Components --> Hooks --> Services
@@ -250,7 +249,6 @@ graph TB
 | **百度** | ERNIE 5.0 | 中文剧本优化 |
 | **阿里** | Qwen 3.5 | 通用文本生成 |
 | **智谱** | GLM-5 | 多模态理解 |
-| **MiniMax** | M2.5 | 语音合成、配音 |
 
 ---
 
