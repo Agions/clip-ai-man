@@ -1,8 +1,8 @@
 {
-  "name": "comicflow",
+  "name": "manga-ai",
   "private": true,
   "version": "2.0.0",
-  "description": "ComicFlow - AI-Powered Comic Drama Video Creation Platform",
+  "description": "ManGa AI - AI-Powered Comic Drama Video Creation Platform",
   "author": "ClipAiMan <inkmotion@example.com>",
   "license": "MIT",
   "type": "module",
