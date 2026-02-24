@@ -238,7 +238,7 @@ export const RENDER_SETTINGS: StepSetting[] = [
     type: 'select',
     options: [
       { value: 'auto', label: '🤖 自动选择 (根据API Key)' },
-      { value: 'jimeng-2.0', label: '即梦 2.0 (字节)' },
+      { value: 'seedream-5.0', label: 'Seedream 5.0 (字节)' },
       { value: 'kling-1.6', label: '可灵 1.6 (快手)' },
       { value: 'vidu-2.0', label: 'Vidu 2.0 (生数)' },
       { value: 'dalle-3', label: 'DALL-E 3 (OpenAI)' },

@@ -15,9 +15,9 @@ export const MODEL_PROVIDERS = {
   },
   // 图像生成
   image: {
-    primary: 'jimeng-2.0',
+    primary: 'seedream-5.0',
     fallback: ['kling-1.6', 'vidu-2.0', 'dalle-3', 'midjourney-v6'],
-    keys: ['jimeng_api_key', 'kling_api_key', 'vidu_api_key', 'openai_api_key', 'midjourney_api_key']
+    keys: ['seedream_api_key', 'kling_api_key', 'vidu_api_key', 'openai_api_key', 'midjourney_api_key']
   },
   // 视频生成
   video: {
@@ -44,7 +44,7 @@ export const API_KEY_CONFIG: Record<string, { provider: string; name: string }> 
   openai_api_key: { provider: 'openai', name: 'OpenAI' },
   anthropic_api_key: { provider: 'anthropic', name: 'Anthropic' },
   // 图像生成
-  jimeng_api_key: { provider: 'jimeng', name: '即梦' },
+  seedream_api_key: { provider: 'seedream', name: 'Seedream' },
   kling_api_key: { provider: 'kling', name: '可灵' },
   vidu_api_key: { provider: 'vidu', name: 'Vidu' },
   midjourney_api_key: { provider: 'midjourney', name: 'Midjourney' },

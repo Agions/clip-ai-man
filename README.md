@@ -118,11 +118,11 @@ npm run tauri build
 
 | 提供商 | 模型 |
 |--------|------|
+| Seedream | 5.0 (字节) |
+| 可灵 | 1.6 (快手) |
+| Vidu | 2.0 (生数) |
 | OpenAI | DALL-E 3 |
 | Midjourney | V6 |
-| Stable Diffusion | SDXL |
-| 阿里 | 通义万相 |
-| 百度 | 文心一格 |
 
 ### 语音合成
 
