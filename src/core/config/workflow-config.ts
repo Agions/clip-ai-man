@@ -60,20 +60,22 @@ export const IMPORT_SETTINGS: StepSetting[] = [
   }
 ];
 
-// 生成步骤配置
+// 生成步骤配置 (剧本生成)
 export const GENERATE_SETTINGS: StepSetting[] = [
   {
     key: 'model',
     label: 'AI模型',
     type: 'select',
     options: [
-      { value: 'gpt-4', label: 'GPT-4' },
-      { value: 'gpt-3.5', label: 'GPT-3.5' },
-      { value: 'claude-3', label: 'Claude 3' },
-      { value: 'qwen-max', label: '通义千问 Max' },
-      { value: 'ERNIE-4', label: '文心一言 4.0' },
+      { value: 'glm-5', label: 'GLM-5 (智谱)' },
+      { value: 'minimax-m2.5', label: 'MiniMax M2.5' },
+      { value: 'kimi-k2.5', label: 'Kimi K2.5 (月之暗面)' },
+      { value: 'doubao-2.0', label: '豆包 2.0 (字节)' },
+      { value: 'gpt-4o', label: 'GPT-4o' },
+      { value: 'claude-3.5', label: 'Claude 3.5' },
+      { value: 'qwen-2.5', label: 'Qwen 2.5 (阿里)' },
     ],
-    default: 'gpt-4'
+    default: 'glm-5'
   },
   {
     key: 'episodes',
@@ -227,8 +229,21 @@ export const CHARACTER_SETTINGS: StepSetting[] = [
   }
 ];
 
-// 渲染步骤配置
+// 渲染步骤配置 (图像生成)
 export const RENDER_SETTINGS: StepSetting[] = [
+  {
+    key: 'imageModel',
+    label: '图像模型',
+    type: 'select',
+    options: [
+      { value: 'jimeng-2.0', label: '即梦 2.0 (字节)' },
+      { value: 'kling-1.6', label: '可灵 1.6 (快手)' },
+      { value: 'vidu-2.0', label: 'Vidu 2.0 (生数)' },
+      { value: 'dalle-3', label: 'DALL-E 3 (OpenAI)' },
+      { value: 'midjourney-v6', label: 'Midjourney V6' },
+    ],
+    default: 'jimeng-2.0'
+  },
   {
     key: 'engine',
     label: '渲染引擎',
@@ -286,8 +301,21 @@ export const RENDER_SETTINGS: StepSetting[] = [
   }
 ];
 
-// 合成步骤配置 (包含配音)
+// 合成步骤配置 (包含配音和视频生成)
 export const ANIMATE_SETTINGS: StepSetting[] = [
+  {
+    key: 'videoModel',
+    label: '视频生成模型',
+    type: 'select',
+    options: [
+      { value: 'seedance-2.0', label: 'Seedance 2.0 (字节)' },
+      { value: 'kling-1.6', label: '可灵 1.6 (快手)' },
+      { value: 'vidu-2.0', label: 'Vidu 2.0 (生数)' },
+      { value: 'runway-gen3', label: 'Gen-3 (Runway)' },
+      { value: 'pika-1.0', label: 'Pika 1.0' },
+    ],
+    default: 'seedance-2.0'
+  },
   {
     key: 'animationType',
     label: '动画类型',
