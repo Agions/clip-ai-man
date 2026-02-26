@@ -12,7 +12,8 @@ import {
   AppstoreOutlined,
   FireOutlined,
   ScissorOutlined,
-  BookOutlined
+  BookOutlined,
+  ThunderboltOutlined
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './Layout.module.less';
@@ -67,6 +68,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: <HomeOutlined />,
       label: '首页',
       onClick: () => navigate('/')
+    },
+    {
+      key: '/workflow',
+      icon: <ThunderboltOutlined />,
+      label: '漫剧工作流',
+      onClick: () => navigate('/workflow')
     },
     {
       key: '/project',
@@ -230,6 +237,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Header className={styles.header}>
           <div className={styles.headerTitle}>
             {location.pathname === '/' && '欢迎使用ClipAiMan'}
+            {location.pathname.startsWith('/workflow') && '漫剧工作流'}
             {location.pathname.startsWith('/project') && '项目管理'}
             {location.pathname.startsWith('/templates') && '模板中心'}
             {location.pathname.startsWith('/editor') && '视频剪辑工作台'}

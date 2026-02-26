@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Typography, Button, Card, Row, Col, List, 
-  Empty, Spin, Space, message, Modal, Statistic, Divider, Tag
+  Empty, Spin, Space, message, Modal, Statistic, Divider, Tag, Tabs
 } from 'antd';
 import { 
   VideoCameraOutlined, 
@@ -18,12 +18,16 @@ import {
   CloudOutlined,
   ToolOutlined,
   StarOutlined,
-  BulbOutlined
+  BulbOutlined,
+  PictureOutlined,
+  SoundOutlined
 } from '@ant-design/icons';
 import { useTheme } from '@/context/ThemeContext';
+import AIImageGenerator from '@/components/business/AIImageGenerator';
 import styles from './Home.module.less';
 
 const { Title, Paragraph, Text } = Typography;
+const { TabPane } = Tabs;
 
 // 定义项目接口
 interface Project {
@@ -213,6 +217,55 @@ const Home = () => {
         </Col>
       </Row>
       
+      {/* AI 工具箱 */}
+      <Card 
+        title={
+          <div className={styles.sectionHeader}>
+            <Text strong style={{ fontSize: 18 }}>
+              <RocketOutlined /> AI 工具箱
+            </Text>
+          </div>
+        }
+        className={`${styles.sectionCard} ${isDarkMode ? styles.darkCard : ''}`}
+        bordered={false}
+      >
+        <Tabs defaultActiveKey="image">
+          <TabPane 
+            tab={
+              <span>
+                <PictureOutlined />
+                图像/视频生成
+              </span>
+            } 
+            key="image"
+          >
+            <AIImageGenerator />
+          </TabPane>
+          <TabPane 
+            tab={
+              <span>
+                <SoundOutlined />
+                智能配音
+              </span>
+            } 
+            key="dubbing"
+          >
+            <div style={{ padding: 40, textAlign: 'center' }}>
+              <Text type="secondary">智能配音功能已集成到工作流中</Text>
+              <br />
+              <Button 
+                type="primary" 
+                icon={<ThunderboltOutlined />}
+                onClick={() => navigate('/workflow')}
+                style={{ marginTop: 16 }}
+              >
+                前往漫剧工作流
+              </Button>
+            </div>
+          </TabPane>
+        </Tabs>
+      </Card>
+
       {/* 项目列表 */}
       <Card 
         title={

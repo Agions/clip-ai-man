@@ -8,6 +8,7 @@ import ProjectDetail from './pages/ProjectDetail';
 import ScriptDetail from './pages/ScriptDetail';
 import VideoEditor from './pages/VideoEditor';
 import Settings from './pages/Settings';
+import WorkflowPage from './pages/Workflow';
 import './App.css';
 
 // 导入Provider组件
@@ -100,6 +101,9 @@ const App: React.FC = () => {
             {/* 脚本页面 */}
             <Route path="/scripts" element={<Home />} />
             <Route path="/script/:scriptId" element={<ScriptDetail />} />
+            
+            {/* 工作流页面 */}
+            <Route path="/workflow" element={<WorkflowPage />} />
             
             {/* 模板页面 */}
             <Route path="/templates" element={<Home />} />
