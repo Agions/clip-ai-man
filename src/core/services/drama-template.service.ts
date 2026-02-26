@@ -285,11 +285,31 @@ const DEFAULT_STYLE_TEMPLATES: StyleTemplate[] = [
 
 // ========== 服务类 ==========
 
+// 导入扩展模板
+import {
+  EXTENDED_STORYBOARD_TEMPLATES,
+  EXTENDED_SCENE_TEMPLATES,
+  EXTENDED_CHARACTER_TEMPLATES,
+  EXTENDED_STYLE_TEMPLATES,
+} from './templates/extended';
+
 class DramaTemplateService {
-  private storyboardTemplates: StoryboardTemplate[] = [...DEFAULT_STORYBOARD_TEMPLATES];
-  private sceneTemplates: SceneTemplate[] = [...DEFAULT_SCENE_TEMPLATES];
-  private characterTemplates: CharacterTemplate[] = [...DEFAULT_CHARACTER_TEMPLATES];
-  private styleTemplates: StyleTemplate[] = [...DEFAULT_STYLE_TEMPLATES];
+  private storyboardTemplates: StoryboardTemplate[] = [
+    ...DEFAULT_STORYBOARD_TEMPLATES,
+    ...EXTENDED_STORYBOARD_TEMPLATES,
+  ];
+  private sceneTemplates: SceneTemplate[] = [
+    ...DEFAULT_SCENE_TEMPLATES,
+    ...EXTENDED_SCENE_TEMPLATES,
+  ];
+  private characterTemplates: CharacterTemplate[] = [
+    ...DEFAULT_CHARACTER_TEMPLATES,
+    ...EXTENDED_CHARACTER_TEMPLATES,
+  ];
+  private styleTemplates: StyleTemplate[] = [
+    ...DEFAULT_STYLE_TEMPLATES,
+    ...EXTENDED_STYLE_TEMPLATES,
+  ];
   private dialogueTemplates: DialogueTemplate[] = [];
 
   constructor() {
