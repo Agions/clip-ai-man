@@ -2,17 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Layout, Card, Button, Dropdown, Space, Typography, Tabs, 
-  Row, Col, Progress, Tooltip, message, Empty, Tag, Skeleton
+  Row, Col, Progress, Tooltip, message, Empty, Tag, Skeleton,
+  Modal, Radio, Slider
 } from 'antd';
 import { 
   PlayCircleOutlined, PauseCircleOutlined, ScissorOutlined, 
   SaveOutlined, UndoOutlined, RedoOutlined, DownloadOutlined, 
   FileImageOutlined, SettingOutlined, UploadOutlined, CopyOutlined,
   DeleteOutlined, CheckCircleOutlined, ShareAltOutlined, PlusOutlined,
-  FullscreenOutlined, SyncOutlined, ExpandOutlined, LockOutlined
+  FullscreenOutlined, SyncOutlined, ExpandOutlined, LockOutlined,
+  VideoCameraOutlined
 } from '@ant-design/icons';
 import { invoke } from '@tauri-apps/api/tauri';
-import { open } from '@tauri-apps/api/dialog';
+import { open, save } from '@tauri-apps/api/dialog';
 
 import styles from './VideoEditor.module.less';
 
@@ -242,17 +244,53 @@ const VideoEditor: React.FC = () => {
   
   // 导出视频
   const handleExportVideo = async () => {
-    setIsExporting(true);
-    
+    if (segments.length === 0) {
+      message.warning('请先添加需要导出的片段');
+      return;
+    }
+
     try {
-      // 模拟导出
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 让用户选择输出文件路径
+      const outputPath = await save({
+        defaultPath: `export_${Date.now()}.${outputFormat}`,
+        filters: [
+          { name: 'Video Files', extensions: [outputFormat] }
+        ]
+      });
+
+      if (!outputPath) {
+        return; // 用户取消了
+      }
+
+      setIsExporting(true);
       
-      // 导出视频逻辑
-      message.success('视频导出成功');
+      // 准备片段数据
+      const videoSegments = segments.map(seg => ({
+        start: seg.start,
+        end: seg.end,
+        type_field: null,
+        content: null
+      }));
+
+      // 调用后端 cut_video 命令
+      const result = await invoke<string>('cut_video', {
+        params: {
+          input_path: videoSrc.replace('tauri://localhost/', ''),
+          output_path: outputPath,
+          segments: videoSegments,
+          quality: videoQuality,
+          format: outputFormat,
+          transition: 'none',
+          transition_duration: 0.5,
+          volume: 1.0,
+          add_subtitles: false
+        }
+      });
+
+      message.success(`视频导出成功: ${result}`);
     } catch (error) {
       console.error('导出失败:', error);
-      message.error('导出失败，请重试');
+      message.error(`导出失败: ${error}`);
     } finally {
       setIsExporting(false);
     }

@@ -302,11 +302,42 @@ async fn cut_video(params: CutVideoParams, window: Window) -> Result<String, Str
     
     // 处理视频质量
     let quality = params.quality.unwrap_or_else(|| "medium".to_string());
-    let quality_params = match quality.as_str() {
-        "low" => "-vf scale=1280:720 -b:v 1.5M",
-        "medium" => "-vf scale=1920:1080 -b:v 4M",
-        "high" => "-b:v 8M", // 保持原始分辨率
-        _ => "-vf scale=1920:1080 -b:v 4M", // 默认中等质量
+    
+    // 根据格式和质量设置视频编码参数
+    let (video_codec, video_params) = match format.as_str() {
+        "mp4" | "mov" => {
+            // MP4/MOV 使用 H.264 编码
+            let params = match quality.as_str() {
+                "low" => "-vf scale=1280:720 -b:v 1.5M -preset fast",
+                "medium" => "-vf scale=1920:1080 -b:v 4M -preset fast",
+                "high" => "-b:v 8M -preset slow",
+                "ultra" => "-b:v 15M -preset slow",
+                _ => "-vf scale=1920:1080 -b:v 4M -preset fast",
+            };
+            ("libx264".to_string(), params.to_string())
+        },
+        "webm" => {
+            // WebM 使用 VP9 编码
+            let params = match quality.as_str() {
+                "low" => "-vf scale=1280:720 -b:v 1M",
+                "medium" => "-vf scale=1920:1080 -b:v 3M",
+                "high" => "-b:v 6M",
+                "ultra" => "-b:v 10M",
+                _ => "-vf scale=1920:1080 -b:v 3M",
+            };
+            ("libvpx-vp9".to_string(), params.to_string())
+        },
+        "mkv" | _ => {
+            // MKV 和其他格式默认使用 H.264
+            let params = match quality.as_str() {
+                "low" => "-vf scale=1280:720 -b:v 1.5M",
+                "medium" => "-vf scale=1920:1080 -b:v 4M",
+                "high" => "-b:v 8M",
+                "ultra" => "-b:v 15M",
+                _ => "-vf scale=1920:1080 -b:v 4M",
+            };
+            ("libx264".to_string(), params.to_string())
+        }
     };
     
     // 处理转场效果
@@ -386,14 +417,15 @@ async fn cut_video(params: CutVideoParams, window: Window) -> Result<String, Str
             String::new()
         };
         
-        // 构建FFmpeg命令
+        // 构建FFmpeg命令 - 使用动态编码器
         let ffmpeg_command = format!(
-            "ffmpeg -y -ss {} -i \"{}\" -t {} {} {} -c:a aac -strict experimental \"{}\"",
+            "ffmpeg -y -ss {} -i \"{}\" -t {} {} {} -c:v {} -c:a aac -strict experimental \"{}\"",
             segment.start,
             params.input_path,
             duration,
-            quality_params,
+            video_params,
             filter_param,
+            video_codec,
             segment_path
         );
         
@@ -494,10 +526,18 @@ async fn cut_video(params: CutVideoParams, window: Window) -> Result<String, Str
             .map_err(|e| format!("写入片段列表失败: {}", e))?;
     }
     
-    // 使用FFmpeg连接所有片段
+    // 使用FFmpeg连接所有片段 - 根据输出格式重新编码
+    let (output_video_codec, output_audio_codec) = match format.as_str() {
+        "mp4" | "mov" => ("libx264", "aac"),
+        "webm" => ("libvpx-vp9", "libopus"),
+        _ => ("libx264", "aac"),
+    };
+    
     let concat_command = format!(
-        "ffmpeg -y -f concat -safe 0 -i \"{}\" -c copy \"{}\"",
+        "ffmpeg -y -f concat -safe 0 -i \"{}\" -c:v {} -c:a {} -strict experimental \"{}\"",
         list_file.to_string_lossy(),
+        output_video_codec,
+        output_audio_codec,
         params.output_path
     );
     
