@@ -27,6 +27,9 @@ export {
   IMAGE_MODELS,
   VIDEO_MODELS,
   TTS_PROVIDERS,
+  LLM_MODELS,
+  DEFAULT_LLM_MODEL,
+  MODEL_RECOMMENDATIONS,
 } from './ai';
 
 // 应用相关

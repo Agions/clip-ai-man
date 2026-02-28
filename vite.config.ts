@@ -74,7 +74,12 @@ export default defineConfig({
       },
     },
     rollupOptions: {
+      external: ['@tauri-apps/api/core', '@tauri-apps/api/event'],
       output: {
+        globals: {
+          '@tauri-apps/api/core': 'window.__TAURI__',
+          '@tauri-apps/api/event': 'window.__TAURI__',
+        },
         manualChunks: (id) => {
           // React 核心
           if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {

@@ -2,6 +2,62 @@
  * AI 模型相关常量
  */
 
+// LLM 模型列表（用于 AI 服务）
+export const LLM_MODELS = {
+  BAIDU_ERNIE: {
+    modelId: 'ernie-5.0',
+    name: 'ERNIE 5.0',
+    provider: 'baidu',
+    description: '百度最新大模型',
+    defaultModel: 'ernie-5.0',
+  },
+  ALIBABA_QWEN: {
+    modelId: 'qwen-3.5',
+    name: '通义千问 3.5',
+    provider: 'alibaba',
+    description: '阿里大模型',
+    defaultModel: 'qwen-3.5',
+  },
+  ZHIPU_GLM: {
+    modelId: 'glm-5',
+    name: 'GLM-5',
+    provider: 'zhipu',
+    description: '智谱大模型',
+    defaultModel: 'glm-5',
+  },
+  MOONSHOT_KIMI: {
+    modelId: 'kimi-k2.5',
+    name: 'Kimi k2.5',
+    provider: 'moonshot',
+    description: '月之暗面大模型',
+    defaultModel: 'kimi-k2.5',
+  },
+  MINIMAX: {
+    modelId: 'minimax-m2.5',
+    name: 'MiniMax M2.5',
+    provider: 'minimax',
+    description: 'MiniMax大模型',
+    defaultModel: 'minimax-m2.5',
+  },
+  BYTEDANCE_DOUBAO: {
+    modelId: 'doubao-pro',
+    name: '豆包 Pro',
+    provider: 'doubao',
+    description: '字节大模型',
+    defaultModel: 'doubao-pro',
+  },
+} as const;
+
+// 默认 LLM 模型
+export const DEFAULT_LLM_MODEL = LLM_MODELS.BAIDU_ERNIE;
+
+// 模型推荐配置
+export const MODEL_RECOMMENDATIONS = {
+  script: [LLM_MODELS.BAIDU_ERNIE, LLM_MODELS.ALIBABA_QWEN, LLM_MODELS.ZHIPU_GLM],
+  analysis: [LLM_MODELS.MOONSHOT_KIMI, LLM_MODELS.MINIMAX],
+  creative: [LLM_MODELS.BYTEDANCE_DOUBAO, LLM_MODELS.ALIBABA_QWEN],
+} as const;
+
 // AI 模型配置
 export const AI_MODELS = {
   // 百度

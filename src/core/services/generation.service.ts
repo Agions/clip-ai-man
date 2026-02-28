@@ -185,9 +185,9 @@ class GenerationService {
   }
 
   /**
-   * 生成视频
+   * 生成视频任务
    */
-  async generateVideo(
+  async generateVideoTask(
     options: VideoGenerationOptions,
     config: GenerationConfig,
     onProgress?: (progress: number) => void
@@ -697,6 +697,146 @@ class GenerationService {
     }
 
     return count;
+  }
+  /**
+   * 批量生成图像（简化接口）
+   */
+  async generateImages(
+    options: ImageGenerationOptions & { provider?: GenerationProvider },
+    config?: Partial<GenerationConfig>
+  ): Promise<any[]> {
+    const settings = (await import('./settings.service')).settingsService.getSettings();
+    const aiSettings = settings?.ai || {};
+    
+    const finalConfig: GenerationConfig = {
+      provider: options.provider || config?.provider || 'bytedance-seedream',
+      apiKey: config?.apiKey || aiSettings.seedreamApiKey || '',
+      apiSecret: config?.apiSecret || aiSettings.seedreamApiSecret,
+      region: config?.region
+    };
+
+    const result = await this.generateImage(
+      {
+        prompt: options.prompt,
+        negativePrompt: options.negativePrompt,
+        width: options.width,
+        height: options.height,
+        aspectRatio: options.aspectRatio,
+        style: options.style,
+        seed: options.seed,
+        numImages: options.numImages || options.count || 1
+      },
+      finalConfig
+    );
+
+    if (result.status === 'completed' && result.url) {
+      // 如果有多张图，返回所有
+      if (result.urls && result.urls.length > 1) {
+        return result.urls.map((url, i) => ({
+          url,
+          width: options.width,
+          height: options.height
+        }));
+      }
+      return [{
+        url: result.url,
+        width: options.width,
+        height: options.height
+      }];
+    }
+
+    throw new Error(result.error || '图像生成失败');
+  }
+
+  /**
+   * 生成视频（简化接口）
+   */
+  async generateVideo(
+    options: VideoGenerationOptions & { provider?: GenerationProvider },
+    config?: Partial<GenerationConfig>
+  ): Promise<any> {
+    const settings = (await import('./settings.service')).settingsService.getSettings();
+    const aiSettings = settings?.ai || {};
+    
+    const finalConfig: GenerationConfig = {
+      provider: options.provider || config?.provider || 'bytedance-seedance',
+      apiKey: config?.apiKey || aiSettings.seedanceApiKey || '',
+      apiSecret: config?.apiSecret || aiSettings.seedanceApiSecret,
+      region: config?.region
+    };
+
+    const result = await this.generateVideoTask(
+      {
+        prompt: options.prompt,
+        negativePrompt: options.negativePrompt,
+        imageUrl: options.imageUrl,
+        duration: options.duration,
+        aspectRatio: options.aspectRatio,
+        fps: options.fps,
+        motionStrength: options.motionStrength
+      },
+      finalConfig
+    );
+
+    if (result.status === 'completed' && result.url) {
+      return {
+        url: result.url,
+        duration: result.duration,
+        width: result.width,
+        height: result.height
+      };
+    }
+
+    throw new Error(result.error || '视频生成失败');
+  }
+
+  /**
+   * 编辑图像
+   */
+  async editImage(options: {
+    image: string;
+    prompt: string;
+    mask?: string;
+    provider?: GenerationProvider;
+  }): Promise<any> {
+    // TODO: 实现图像编辑
+    return {
+      data: options.image, // 暂时返回原图
+      edited: false
+    };
+  }
+
+  /**
+   * 放大图像
+   */
+  async upscaleImage(options: {
+    image: string;
+    scale?: number;
+    model?: string;
+  }): Promise<any> {
+    // TODO: 实现图像放大
+    return {
+      data: options.image,
+      scale: options.scale || 2
+    };
+  }
+
+  /**
+   * 生成音乐
+   */
+  async generateMusic(options: {
+    style?: string;
+    duration?: number;
+    tempo?: string;
+    mood?: string;
+    provider?: string;
+  }): Promise<any> {
+    // TODO: 实现音乐生成
+    return {
+      data: '',
+      duration: options.duration || 30,
+      style: options.style
+    };
   }
 }
 

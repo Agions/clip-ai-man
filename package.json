@@ -1,7 +1,7 @@
 {
   "name": "manga-ai",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "ManGa AI - AI-Powered Comic Drama Video Creation Platform",
   "author": "ClipAiMan <inkmotion@example.com>",
   "license": "MIT",

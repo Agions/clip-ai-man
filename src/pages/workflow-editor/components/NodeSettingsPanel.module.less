@@ -1,0 +1,116 @@
+.panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  color: #fff;
+  overflow-y: auto;
+}
+
+.empty {
+  padding: 40px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.header {
+  h3 {
+    margin: 0 0 4px 0;
+    color: #fff;
+    font-size: 16px;
+  }
+
+  .nodeType {
+    color: #94a3b8;
+    font-size: 12px;
+  }
+}
+
+.form {
+  :global {
+    .ant-form-item-label > label {
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    .ant-input,
+    .ant-input-number,
+    .ant-select-selector,
+    .ant-input-textarea textarea {
+      background: #1a1a2e !important;
+      border-color: #2d3748 !important;
+      color: #fff !important;
+      border-radius: 6px;
+    }
+
+    .ant-input:focus,
+    .ant-input-number:focus,
+    .ant-input-textarea:focus,
+    .ant-select-focused .ant-select-selector {
+      border-color: #e94560 !important;
+      box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.2) !important;
+    }
+
+    .ant-input::placeholder,
+    .ant-input-textarea textarea::placeholder {
+      color: #4a5568;
+    }
+
+    .ant-select-arrow,
+    .ant-select-selection-item {
+      color: #fff;
+    }
+
+    .ant-switch {
+      background: #2d3748;
+      
+      &.ant-switch-checked {
+        background: #e94560;
+      }
+    }
+
+    .ant-slider {
+      .ant-slider-rail {
+        background: #2d3748;
+      }
+      
+      .ant-slider-track {
+        background: #e94560;
+      }
+      
+      .ant-slider-handle {
+        border-color: #e94560;
+      }
+      
+      .ant-slider-mark-text {
+        color: #64748b;
+        font-size: 11px;
+      }
+    }
+  }
+}
+
+.codeEditor {
+  font-family: 'Fira Code', 'Monaco', monospace;
+  font-size: 12px;
+}
+
+.hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  :global {
+    .ant-btn {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+}

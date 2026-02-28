@@ -6,6 +6,7 @@
 import { message } from 'antd';
 import type { AIModel, AIModelSettings, ScriptData, VideoAnalysis } from '@/core/types';
 import { LLM_MODELS, DEFAULT_LLM_MODEL, MODEL_RECOMMENDATIONS } from '@/core/constants';
+import { settingsService } from './settings.service';
 
 // API 响应类型
 interface AIResponse {
@@ -702,6 +703,111 @@ ${script}
     }
     
     return keyframes;
+  }
+
+  /**
+   * 通用对话接口
+   */
+  async chat(
+    prompt: string,
+    options?: {
+      model?: string;
+      temperature?: number;
+      maxTokens?: number;
+      systemPrompt?: string;
+    }
+  ): Promise<AIResponse> {
+    const settings = settingsService.getSettings();
+    const aiSettings = settings?.ai || {};
+    
+    // 获取默认模型配置
+    const defaultModel = LLM_MODELS.find(m => m.id === (aiSettings.defaultModel || DEFAULT_LLM_MODEL)) || LLM_MODELS[0];
+    
+    const model: AIModel = {
+      id: options?.model || aiSettings.defaultModel || defaultModel.id,
+      name: defaultModel.name,
+      provider: defaultModel.provider
+    };
+
+    const config: RequestConfig = {
+      model: model.id,
+      messages: [
+        {
+          role: 'system',
+          content: options?.systemPrompt || '你是一个智能助手，请根据用户的需求提供帮助。'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      temperature: options?.temperature ?? aiSettings.temperature ?? 0.7,
+      max_tokens: options?.maxTokens ?? aiSettings.maxTokens ?? 2000
+    };
+
+    // 根据 provider 调用相应 API
+    try {
+      switch (model.provider) {
+        case 'openai':
+          return await this.callOpenAI(aiSettings.apiKey!, config);
+        case 'baidu':
+          return await this.callBaidu(aiSettings.apiKey!, aiSettings.apiSecret!, config);
+        case 'alibaba':
+          return await this.callAlibaba(aiSettings.apiKey!, config);
+        case 'zhipu':
+          return await this.callZhipu(aiSettings.apiKey!, config);
+        case 'moonshot':
+          return await this.callMoonshot(aiSettings.apiKey!, config);
+        case 'minimax':
+          return await this.callMinimax(aiSettings.apiKey!, config);
+        case 'doubao':
+          return await this.callDoubao(aiSettings.apiKey!, config);
+        default:
+          return await this.mockCall(config);
+      }
+    } catch (error) {
+      console.error('AI 对话失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 文本分析
+   */
+  async analyzeText(
+    text: string,
+    options?: {
+      model?: string;
+      type?: string;
+    }
+  ): Promise<any> {
+    const analysisPrompt = this.buildTextAnalysisPrompt(text, options?.type || 'general');
+    
+    const response = await this.chat(analysisPrompt, {
+      model: options?.model
+    });
+
+    return {
+      originalText: text,
+      analysis: response.content,
+      model: response.model,
+      analyzedAt: new Date().toISOString()
+    };
+  }
+
+  /**
+   * 构建文本分析提示词
+   */
+  private buildTextAnalysisPrompt(text: string, type: string): string {
+    const prompts: Record<string, string> = {
+      general: `请分析以下文本的内容、情感和关键信息：\n\n${text}`,
+      sentiment: `请分析以下文本的情感倾向（积极/消极/中性）：\n\n${text}`,
+      keywords: `请提取以下文本的关键词：\n\n${text}`,
+      summary: `请总结以下文本的主要内容：\n\n${text}`,
+      structure: `请分析以下文本的结构和逻辑：\n\n${text}`
+    };
+
+    return prompts[type] || prompts.general;
   }
 
   /**

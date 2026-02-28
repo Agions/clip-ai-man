@@ -2,6 +2,63 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] - 2026-02-28
+
+### 🔀 n8n 风格工作流编辑器
+
+全新可视化节点编辑器，提供类似 n8n 的拖拽式工作流设计体验。
+
+**核心组件**：
+- `src/core/workflow/types.ts` - 完整类型定义
+- `src/core/workflow/node-registry.ts` - 25+ 节点注册表
+- `src/core/workflow/engine.ts` - 执行引擎
+- `src/core/workflow/manager.ts` - 工作流管理器
+- `src/core/workflow/store.ts` - Zustand 状态管理
+- `src/pages/workflow-editor/` - 可视化编辑器
+
+**编辑器功能**：
+- ✅ 拖拽式节点编辑
+- ✅ 贝塞尔曲线连接线
+- ✅ 滚轮缩放/Alt+拖动平移
+- ✅ 撤销/重做（Ctrl+Z/Y）
+- ✅ 复制/粘贴节点
+- ✅ 工作流导入/导出（JSON）
+- ✅ 节点参数动态配置
+- ✅ 执行状态可视化
+
+**25+ 节点类型**：
+
+| 分类 | 节点 |
+|------|------|
+| 触发器 | manual, schedule, webhook |
+| AI | chat, script, analyze |
+| 图像 | generate, edit, upscale |
+| 视频 | generate, edit, merge |
+| 音频 | tts, music, merge |
+| 数据 | input, transform, merge, filter, code |
+| 流程 | condition, loop, parallel, delay |
+| 输出 | export, save |
+
+**高级特性**：
+- 条件分支与循环控制
+- 并行执行
+- 错误重试机制（指数退避）
+- 超时控制
+- 节点参数验证
+- 表达式求值（`{{json.field}}`）
+
+### 🔧 服务层增强
+
+- `ai.service.ts` - 新增 `chat()`, `analyzeText()` 方法
+- `generation.service.ts` - 新增 `generateImages()`, `generateVideo()` 简化接口
+- `ffmpeg.service.ts` - 新增 `mergeVideos()`, `processVideo()`, `mergeAudioVideo()` 等方法
+
+### 🗑️ 代码清理
+
+- 删除旧的 `src/core/services/workflow/` 目录
+- 删除旧的 `src/components/business/WorkflowManager/` 组件
+- 更新 Workflow 页面使用新编辑器
+
 ## [2.0.0] - 2026-02-22
 
 ### 🎉 项目重命名

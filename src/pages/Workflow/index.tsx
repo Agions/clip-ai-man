@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Typography, Alert, Space, Tabs } from 'antd';
 import { ThunderboltOutlined, InfoCircleOutlined, PictureOutlined, ClusterOutlined } from '@ant-design/icons';
-import WorkflowManager from '@/components/business/WorkflowManager';
+import WorkflowEditor from '@/pages/workflow-editor';
 import FFmpegStatus from '@/components/business/FFmpegStatus';
 import AIImageGenerator from '@/components/business/AIImageGenerator';
 import styles from './index.module.less';
@@ -19,12 +19,12 @@ const WorkflowPage: React.FC = () => {
           <ThunderboltOutlined style={{ fontSize: 24, color: '#faad14' }} />
           <Title level={3} style={{ margin: 0 }}>漫剧工作流</Title>
         </Space>
-        <Text type="secondary">9 步自动化创作流程，一键生成漫剧视频</Text>
+        <Text type="secondary">节点式可视化工作流编辑器，自由组合 AI、图像、视频、音频节点</Text>
       </div>
 
       <Alert
-        message="工作流说明"
-        description="漫剧工作流包含 9 个步骤：剧本创作 → 分镜设计 → 角色设定 → 场景生成 → 图像生成 → 智能配音 → 视频生成 → 后期剪辑 → 导出成品。每个步骤都可以单独执行或跳过。"
+        message="工作流编辑器"
+        description="从左侧拖拽节点到画布，连接节点创建工作流。支持 AI 对话、图像生成、视频生成、语音合成等 25+ 节点类型。"
         type="info"
         showIcon
         icon={<InfoCircleOutlined />}
@@ -39,12 +39,14 @@ const WorkflowPage: React.FC = () => {
             tab={
               <span>
                 <ClusterOutlined />
-                漫剧工作流
+                工作流编辑器
               </span>
             }
             key="workflow"
           >
-            <WorkflowManager />
+            <div style={{ height: 600 }}>
+              <WorkflowEditor />
+            </div>
           </TabPane>
           <TabPane
             tab={

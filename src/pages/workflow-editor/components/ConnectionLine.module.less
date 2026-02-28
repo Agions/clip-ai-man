@@ -1,0 +1,49 @@
+.connection {
+  transition: all 0.2s;
+
+  &:hover {
+    .line {
+      stroke: #e94560;
+      stroke-width: 3;
+    }
+  }
+
+  &.selected {
+    .line {
+      stroke: #e94560;
+      stroke-width: 3;
+    }
+
+    .glow {
+      opacity: 0.3;
+    }
+  }
+
+  &.draft {
+    .line {
+      stroke: #64748b;
+      stroke-dasharray: 8, 4;
+      animation: dash 0.5s linear infinite;
+    }
+  }
+}
+
+.line {
+  transition: stroke 0.2s, stroke-width 0.2s;
+}
+
+.glow {
+  opacity: 0;
+  filter: blur(4px);
+  transition: opacity 0.2s;
+}
+
+.animatedDot {
+  opacity: 0.6;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -12;
+  }
+}

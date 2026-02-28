@@ -6,7 +6,7 @@
 
 **AI 漫剧视频智能创作平台**
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/Agions/ManGaAI)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](https://github.com/Agions/ManGaAI)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org/)
@@ -124,6 +124,38 @@ ManGaAI 深度集成国内主流 AI 大模型，为用户提供多样化选择�
 - 实时日志
 - 项目历史管理
 
+### 🔀 n8n 风格节点编辑器
+
+全新可视化工作流编辑器，类似 n8n 的节点式设计：
+
+**核心功能**：
+- 🖱️ 拖拽式节点编辑
+- 🔗 可视化连接线（贝塞尔曲线）
+- 🔍 画布缩放/平移（滚轮/Alt+拖动）
+- ↩️ 撤销/重做（Ctrl+Z/Y）
+- 📋 复制/粘贴节点
+- 💾 工作流导入/导出
+
+**25+ 节点类型**：
+
+| 分类 | 节点 | 功能 |
+|------|------|------|
+| 触发器 | manual, schedule, webhook | 启动工作流 |
+| AI | chat, script, analyze | AI 对话与分析 |
+| 图像 | generate, edit, upscale | 图像生成处理 |
+| 视频 | generate, edit, merge | 视频生成剪辑 |
+| 音频 | tts, music, merge | 语音音乐合成 |
+| 数据 | input, transform, merge, filter, code | 数据处理 |
+| 流程 | condition, loop, parallel, delay | 流程控制 |
+| 输出 | export, save | 结果导出 |
+
+**高级特性**：
+- 条件分支与循环
+- 并行执行
+- 错误重试机制
+- 超时控制
+- 节点参数动态配置
+
 ### 📦 40+ 漫剧模板
 
 丰富的创作模板库：
@@ -202,6 +234,8 @@ npm run tauri build
 
 ### 快捷键
 
+**通用**：
+
 | 快捷键 | 功能 |
 |--------|------|
 | `Ctrl + N` | 新建项目 |
@@ -211,6 +245,19 @@ npm run tauri build
 | `Ctrl + Y` | 重做 |
 | `Space` | 播放/暂停预览 |
 | `Ctrl + E` | 导出视频 |
+
+**工作流编辑器**：
+
+| 快捷键 | 功能 |
+|--------|------|
+| `Ctrl + Z` | 撤销节点操作 |
+| `Ctrl + Shift + Z` | 重做 |
+| `Ctrl + C` | 复制选中节点 |
+| `Ctrl + V` | 粘贴节点 |
+| `Delete` / `Backspace` | 删除选中 |
+| `Alt + 左键拖动` | 平移画布 |
+| `滚轮` | 缩放画布 |
+| `Escape` | 取消连接 |
 
 ---
 
@@ -248,19 +295,31 @@ ManGaAI/
 │   │   │   ├── tts.service.ts     # 语音合成
 │   │   │   ├── generation.service.ts  # 图像/视频生成
 │   │   │   ├── ffmpeg.service.ts  # 视频处理
-│   │   │   ├── workflow.service.ts # 工作流
-│   │   │   └── settings.service.ts # 设置管理
+│   │   │   ├── settings.service.ts # 设置管理
+│   │   │   └── storage.service.ts  # 存储服务
+│   │   ├── workflow/           # 工作流系统
+│   │   │   ├── types.ts          # 类型定义
+│   │   │   ├── node-registry.ts  # 节点注册表
+│   │   │   ├── engine.ts         # 执行引擎
+│   │   │   ├── manager.ts        # 工作流管理
+│   │   │   └── store.ts          # 状态管理
 │   │   └── types/              # 类型定义
 │   ├── components/
 │   │   ├── business/           # 业务组件
 │   │   │   ├── AIImageGenerator/   # 图像生成器
-│   │   │   ├── WorkflowManager/    # 工作流管理
-│   │   │   ├── FFmpegStatus/       # FFmpeg 状态
 │   │   │   └── RecommendPanel/     # 推荐面板
 │   │   └── layout/             # 布局组件
 │   ├── pages/                  # 页面
 │   │   ├── Home.tsx            # 首页
-│   │   ├── Workflow/           # 工作流页面
+│   │   ├── workflow-editor/    # 工作流编辑器
+│   │   │   ├── index.tsx          # 编辑器页面
+│   │   │   └── components/        # 编辑器组件
+│   │   │       ├── WorkflowCanvas.tsx
+│   │   │       ├── NodeComponent.tsx
+│   │   │       ├── ConnectionLine.tsx
+│   │   │       ├── NodePanel.tsx
+│   │   │       ├── NodeSettingsPanel.tsx
+│   │   │       └── ExecutionPanel.tsx
 │   │   ├── Editor/             # 编辑器页面
 │   │   └── Settings.tsx        # 设置页面
 │   ├── hooks/                  # 自定义 Hooks
@@ -307,19 +366,41 @@ const result = await ttsService.synthesize({
 });
 ```
 
-#### 工作流服务
+#### 工作流引擎
 
 ```typescript
-import { workflowService } from '@/core/services';
+import { workflowManager } from '@/core/workflow';
 
-// 创建工作流项目
-const project = workflowService.createProject({
-  name: '我的漫剧',
-  description: '测试项目',
-});
+// 创建工作流
+const workflow = workflowManager.createWorkflow('我的工作流');
 
-// 启动工作流
-await workflowService.startWorkflow(project.id);
+// 添加节点
+const node1 = workflowManager.addNode(workflow.id, 'trigger.manual', { x: 100, y: 100 });
+const node2 = workflowManager.addNode(workflow.id, 'ai.chat', { x: 400, y: 100 });
+
+// 添加连接
+workflowManager.addConnection(workflow.id, node1.id, 'main', node2.id, 'main');
+
+// 执行工作流
+await workflowManager.executeWorkflow(workflow.id);
+
+// 导出/导入
+const json = workflowManager.exportWorkflow(workflow.id);
+const imported = workflowManager.importWorkflow(json);
+```
+
+#### 节点类型
+
+```typescript
+import { getNodeDefinition, NODE_REGISTRY } from '@/core/workflow/node-registry';
+
+// 获取节点定义
+const chatNode = getNodeDefinition('ai.chat');
+console.log(chatNode?.displayName); // "AI 对话"
+console.log(chatNode?.parameters);   // 参数列表
+
+// 查看所有节点
+console.log(NODE_REGISTRY.map(n => n.type));
 ```
 
 ### 添加新的 AI 模型

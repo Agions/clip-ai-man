@@ -255,6 +255,164 @@ class FFmpegService {
     if (resolution >= 1280 * 720) return 'medium';
     return 'low';
   }
+
+  /**
+   * 合并多个视频
+   */
+  async mergeVideos(
+    videos: string[] | Buffer[],
+    options?: {
+      transition?: string;
+      transitionDuration?: number;
+      outputFormat?: string;
+    }
+  ): Promise<{ data: string; duration?: number }> {
+    try {
+      // 如果是 Tauri 环境，调用后端
+      if (typeof invoke !== 'undefined') {
+        const result = await invoke<{ path: string; duration: number }>('merge_videos', {
+          videos,
+          options: {
+            transition: options?.transition || 'none',
+            transitionDuration: options?.transitionDuration || 0.5,
+            outputFormat: options?.outputFormat || 'mp4'
+          }
+        });
+        return { data: result.path, duration: result.duration };
+      }
+
+      // 浏览器环境模拟
+      console.log('mergeVideos called with', videos.length, 'videos');
+      return {
+        data: videos[0]?.toString() || '',
+        duration: videos.length * 5 // 模拟时长
+      };
+    } catch (error) {
+      console.error('合并视频失败:', error);
+      throw new Error(`合并视频失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  }
+
+  /**
+   * 处理视频（剪辑、特效等）
+   */
+  async processVideo(options: {
+    input: string | Buffer;
+    operation: 'trim' | 'resize' | 'convert' | 'effect' | 'watermark';
+    startTime?: number;
+    endTime?: number;
+    effects?: string[];
+    width?: number;
+    height?: number;
+    outputFormat?: string;
+  }): Promise<{ data: string }> {
+    try {
+      // 如果是 Tauri 环境，调用后端
+      if (typeof invoke !== 'undefined') {
+        const result = await invoke<{ path: string }>('process_video', {
+          input: options.input,
+          operation: options.operation,
+          params: {
+            startTime: options.startTime,
+            endTime: options.endTime,
+            effects: options.effects,
+            width: options.width,
+            height: options.height,
+            outputFormat: options.outputFormat || 'mp4'
+          }
+        });
+        return { data: result.path };
+      }
+
+      // 浏览器环境模拟
+      console.log('processVideo called with operation:', options.operation);
+      return {
+        data: typeof options.input === 'string' ? options.input : ''
+      };
+    } catch (error) {
+      console.error('视频处理失败:', error);
+      throw new Error(`视频处理失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  }
+
+  /**
+   * 合并音频和视频
+   */
+  async mergeAudioVideo(options: {
+    video?: string | Buffer;
+    audios?: Array<{
+      data: string | Buffer;
+      fadeIn?: number;
+      fadeOut?: number;
+    }>;
+    crossfade?: number;
+  }): Promise<{ data: string; duration?: number }> {
+    try {
+      // 如果是 Tauri 环境，调用后端
+      if (typeof invoke !== 'undefined') {
+        const result = await invoke<{ path: string; duration: number }>('merge_audio_video', {
+          video: options.video,
+          audios: options.audios,
+          crossfade: options.crossfade || 0
+        });
+        return { data: result.path, duration: result.duration };
+      }
+
+      // 浏览器环境模拟
+      console.log('mergeAudioVideo called');
+      return {
+        data: typeof options.video === 'string' ? options.video : '',
+        duration: 30
+      };
+    } catch (error) {
+      console.error('音视频合并失败:', error);
+      throw new Error(`音视频合并失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  }
+
+  /**
+   * 提取音频
+   */
+  async extractAudio(videoPath: string): Promise<{ data: string }> {
+    try {
+      if (typeof invoke !== 'undefined') {
+        const result = await invoke<{ path: string }>('extract_audio', { videoPath });
+        return { data: result.path };
+      }
+      return { data: '' };
+    } catch (error) {
+      console.error('提取音频失败:', error);
+      throw new Error(`提取音频失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  }
+
+  /**
+   * 添加字幕
+   */
+  async addSubtitles(options: {
+    video: string | Buffer;
+    subtitles: string | Buffer;
+    fontPath?: string;
+    fontSize?: number;
+    position?: 'bottom' | 'top';
+  }): Promise<{ data: string }> {
+    try {
+      if (typeof invoke !== 'undefined') {
+        const result = await invoke<{ path: string }>('add_subtitles', {
+          video: options.video,
+          subtitles: options.subtitles,
+          fontPath: options.fontPath,
+          fontSize: options.fontSize || 24,
+          position: options.position || 'bottom'
+        });
+        return { data: result.path };
+      }
+      return { data: typeof options.video === 'string' ? options.video : '' };
+    } catch (error) {
+      console.error('添加字幕失败:', error);
+      throw new Error(`添加字幕失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  }
 }
 
 // 导出单例
