@@ -165,12 +165,12 @@ export function useSmartModel() {
 
       // 缓存结果
       if (enableCache) {
-        setCache(cacheKey, result);
+        setCache(cacheKey, result.content);
       }
 
       const duration = performance.now() - startTime;
       const generateResult: SmartGenerateResult = {
-        content: result,
+        content: result.content,
         model,
         provider,
         cost: costRecord.cost,

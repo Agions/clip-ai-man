@@ -54,7 +54,7 @@ class AIService {
       baseURL: '',
       model: model.id,
       temperature: options.temperature,
-      max_tokens: options.max_tokens
+      maxTokens: options.max_tokens
     };
     
     const response = await this.callAPI(model, settings, prompt);

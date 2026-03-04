@@ -127,10 +127,10 @@ ${content.slice(0, 10000)}${content.length > 10000 ? '...' : ''}
 4. 确保 JSON 格式正确
 `;
 
-    const response = await aiService.generate(prompt, { provider, model });
+    const aiResponse = await aiService.generate(prompt, { provider, model });
 
     try {
-      const result = JSON.parse(response.content);
+      const result = JSON.parse(aiResponse.content);
       return result as NovelParseResult;
     } catch (error) {
       throw new Error('小说解析失败：AI 返回格式错误');
@@ -188,10 +188,10 @@ ${chapter.content.slice(0, 5000)}${chapter.content.length > 5000 ? '...' : ''}
 5. 确保 JSON 格式正确
 `;
 
-    const response = await aiService.generate(prompt, { provider, model });
+    const aiResponse = await aiService.generate(prompt, { provider, model });
 
     try {
-      const scenes = JSON.parse(response.content);
+      const scenes = JSON.parse(aiResponse.content);
       return scenes.map((scene: any, index: number) => ({
         id: `scene_${chapter.id}_${index}`,
         chapterId: chapter.id,
@@ -308,10 +308,10 @@ ${chapter.content.slice(0, 5000)}${chapter.content.length > 5000 ? '...' : ''}
 4. 确保 JSON 格式正确
 `;
 
-    const response = await aiService.generate(prompt, { provider, model });
+    const aiResponse = await aiService.generate(prompt, { provider, model });
 
     try {
-      const panels = JSON.parse(response.content);
+      const panels = JSON.parse(aiResponse.content);
       return panels.map((panel: any, index: number) => ({
         id: `storyboard_${scene.id}_${index}`,
         sceneId: scene.id,
